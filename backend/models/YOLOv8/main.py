@@ -1,17 +1,41 @@
 import cv2
 
+
+from fastapi import UploadFile
 from ultralytics import YOLO
 from packages.sort.sort import Sort, np
-from models.YOLOv8.util import get_car, read_license_plate
+from models.YOLOv8.util import get_car, read_license_plate, write_csv
+from models.YOLOv8.visualize import visualize
 
 
-def getLicensePlatesFromVideo(
+import os
+
+
+def save_video_file(file: UploadFile, folder: str = 'temp_videos'):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
+    file_path = os.path.join(folder, file.filename)
+
+    with open(file_path, 'wb') as temp_file:
+        content = file.file.read()
+        temp_file.write(content)
+
+    return file_path
+
+
+def getLicensePlatesFromVideo(  # noqa: C901
+    file: UploadFile,
     videoPath='models/YOLOv8/sample.mp4',
     max_frames=20,
     classifier_path='classifiers/license_plate_detector.pt',
     model_path='models/YOLOv8/yolov8n.pt',
+    generate_csv=False,
+    output_path=None,
 ):
     results = {}
+
+    video_path = save_video_file(file, folder='temp_videos')
 
     mot_tracker = Sort()
 
@@ -19,8 +43,11 @@ def getLicensePlatesFromVideo(
     coco_model = YOLO(model_path)
     license_plate_detector = YOLO(classifier_path)
 
+    if not video_path:
+        video_path = videoPath
+
     # load video
-    cap = cv2.VideoCapture(videoPath)
+    cap = cv2.VideoCapture(video_path)
 
     vehicles = [2, 3, 5, 7]
 
@@ -91,5 +118,13 @@ def getLicensePlatesFromVideo(
                                 'text_score': license_plate_text_score,
                             },
                         }
+    cap.release()
+    os.remove(video_path)
+
+    if generate_csv:
+        write_csv(results, 'models/YOLOv8/')
+
+    if output_path:
+        visualize(outputPath=output_path, video_path=video_path)
 
     return license_plate_texts
