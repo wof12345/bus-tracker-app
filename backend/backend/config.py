@@ -9,6 +9,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     debug: bool = True
     database_url: str
+    database_name: str = 'vehicle_tracker_app'
     port: int = 8000
 
     class Config:
