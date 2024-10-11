@@ -1,30 +1,40 @@
-from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
-import cv2
-import numpy as np
-from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import StreamingResponse
-from starlette.requests import Request
-import io
+from models.YOLOv8.main import getLicensePlatesFromVideo
+from fastapi import APIRouter
+from fastapi import APIRouter, File, UploadFile, HTTPException
+from typing import Optional
 
 
 router = APIRouter()
 
+VIDEO_MIME_TYPES = {
+    'video/mp4',
+    'video/avi',
+    'video/mpeg',
+    'video/x-msvideo',
+    'video/webm',
+}
 
-@router.post('/process-frame')
-async def process_frame(file: UploadFile = File(...)):
-    # Read the incoming file as bytes
-    contents = await file.read()
-    np_array = np.frombuffer(contents, np.uint8)
 
-    # Decode the image frame
-    frame = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+@router.post('/extract-license-plates')
+def extract_license_plates(
+    file: UploadFile = File(...),
+    generate_csv: Optional[bool] = False,
+    max_frames: Optional[int] = 100,
+    output_path: Optional[str] = None,
+):
+    if file.content_type not in VIDEO_MIME_TYPES:
+        raise HTTPException(
+            status_code=400, detail='Invalid file type. Please upload a video.'
+        )
 
-    # Process the frame (e.g., object detection, OCR, etc.)
-    # Example: Convert to grayscale and return (You can replace this with TensorFlow model or Tesseract for OCR)
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    generate_csv = True
+    # output_path = 'models/YOLOv8/'
 
-    # Encode processed frame back to JPEG to send it back to the client
-    _, buffer = cv2.imencode('.jpg', gray_frame)
-    processed_bytes = buffer.tobytes()
+    plates = getLicensePlatesFromVideo(
+        file=file,
+        max_frames=max_frames,
+        generate_csv=generate_csv,
+        output_path=output_path,
+    )
 
-    return StreamingResponse(io.BytesIO(processed_bytes), media_type='image/jpeg')
+    return plates

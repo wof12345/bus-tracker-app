@@ -3,13 +3,13 @@ import os
 from functools import lru_cache
 from logging.handlers import RotatingFileHandler
 
-from pydantic import SecretStr
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     debug: bool = True
     database_url: str
+    port: int = 8000
 
     class Config:
         env_file = '.env'
