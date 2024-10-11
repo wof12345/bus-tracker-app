@@ -32,6 +32,7 @@ def getLicensePlatesFromVideo(  # noqa: C901
     model_path='models/YOLOv8/yolov8n.pt',
     generate_csv=False,
     output_path=None,
+    show_video_simulation=False,
 ):
     results = {}
     video_path = None
@@ -125,7 +126,11 @@ def getLicensePlatesFromVideo(  # noqa: C901
         write_csv(results, 'models/YOLOv8/test.csv')
 
     if output_path:
-        visualize(outputPath=output_path, video_path=video_path)
+        visualize(
+            outputPath=output_path,
+            video_path=video_path,
+            show_video_simulation=show_video_simulation,
+        )
 
     cap.release()
     os.remove(video_path)

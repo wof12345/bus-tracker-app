@@ -37,11 +37,14 @@ def draw_border(
 
 
 def visualize(
-    csv_path='models/YOLOv8/test.csv', outputPath='models/YOLOv8/', video_path=''
+    csv_path='models/YOLOv8/test.csv',
+    outputPath='models/YOLOv8/',
+    video_path='',
+    show_video_simulation=False,
 ):
     results = pd.read_csv(csv_path)
 
-    # output_id = uuid4()
+    output_id = uuid4()
     output_id = ''
 
     # load video
@@ -51,7 +54,9 @@ def visualize(
     fps = cap.get(cv2.CAP_PROP_FPS)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    out = cv2.VideoWriter(f'{outputPath}out.mp4', fourcc, fps, (width, height))
+    out = cv2.VideoWriter(
+        f'{outputPath}out{output_id}.mp4', fourcc, fps, (width, height)
+    )
 
     license_plate = {}
     for car_id in np.unique(results['car_id']):
@@ -181,7 +186,10 @@ def visualize(
             out.write(frame)
             frame = cv2.resize(frame, (1280, 720))
 
-            cv2.imshow('frame', frame)
+            if show_video_simulation:
+                cv2.imshow('frame', frame)
+            else:
+                break
 
             # Wait for 1 ms and check if 'q' is pressed
             if cv2.waitKey(1) & 0xFF == ord('q'):
