@@ -26,7 +26,7 @@ def save_video_file(file: UploadFile, folder: str = 'temp_videos'):
 
 def getLicensePlatesFromVideo(  # noqa: C901
     file: UploadFile,
-    videoPath='models/YOLOv8/sample.mp4',
+    video_default_path='models/YOLOv8/sample.mp4',
     max_frames=20,
     classifier_path='classifiers/license_plate_detector.pt',
     model_path='models/YOLOv8/yolov8n.pt',
@@ -34,8 +34,10 @@ def getLicensePlatesFromVideo(  # noqa: C901
     output_path=None,
 ):
     results = {}
+    video_path = None
 
-    video_path = save_video_file(file, folder='temp_videos')
+    if file:
+        video_path = save_video_file(file, folder='temp_videos')
 
     mot_tracker = Sort()
 
@@ -44,7 +46,7 @@ def getLicensePlatesFromVideo(  # noqa: C901
     license_plate_detector = YOLO(classifier_path)
 
     if not video_path:
-        video_path = videoPath
+        video_path = video_default_path
 
     # load video
     cap = cv2.VideoCapture(video_path)
@@ -118,13 +120,14 @@ def getLicensePlatesFromVideo(  # noqa: C901
                                 'text_score': license_plate_text_score,
                             },
                         }
-    cap.release()
-    os.remove(video_path)
 
     if generate_csv:
-        write_csv(results, 'models/YOLOv8/')
+        write_csv(results, 'models/YOLOv8/test.csv')
 
     if output_path:
         visualize(outputPath=output_path, video_path=video_path)
+
+    cap.release()
+    os.remove(video_path)
 
     return license_plate_texts

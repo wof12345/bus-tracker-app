@@ -15,10 +15,11 @@ VIDEO_MIME_TYPES = {
 }
 
 
-@router.get('/extract-license-plates')
+@router.post('/extract-license-plates')
 def extract_license_plates(
     file: UploadFile = File(...),
     generate_csv: Optional[bool] = False,
+    max_frames: Optional[int] = 100,
     output_path: Optional[str] = None,
 ):
     if file.content_type not in VIDEO_MIME_TYPES:
@@ -27,10 +28,13 @@ def extract_license_plates(
         )
 
     generate_csv = True
-    output_path = 'models/YOLOv8/'
+    # output_path = 'models/YOLOv8/'
 
     plates = getLicensePlatesFromVideo(
-        file=file, max_frames=50, generate_csv=generate_csv, output_path=output_path
+        file=file,
+        max_frames=max_frames,
+        generate_csv=generate_csv,
+        output_path=output_path,
     )
 
     return plates

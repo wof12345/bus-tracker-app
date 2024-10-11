@@ -2,7 +2,7 @@ import ast
 import cv2
 import numpy as np
 import pandas as pd
-from uuid import UUID
+from uuid import uuid4
 
 
 def draw_border(
@@ -41,7 +41,8 @@ def visualize(
 ):
     results = pd.read_csv(csv_path)
 
-    output_id = UUID()
+    # output_id = uuid4()
+    output_id = ''
 
     # load video
     cap = cv2.VideoCapture(video_path)
@@ -50,9 +51,7 @@ def visualize(
     fps = cap.get(cv2.CAP_PROP_FPS)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    out = cv2.VideoWriter(
-        f'{outputPath}out_f{output_id}.mp4', fourcc, fps, (width, height)
-    )
+    out = cv2.VideoWriter(f'{outputPath}out.mp4', fourcc, fps, (width, height))
 
     license_plate = {}
     for car_id in np.unique(results['car_id']):
@@ -182,8 +181,12 @@ def visualize(
             out.write(frame)
             frame = cv2.resize(frame, (1280, 720))
 
-            # cv2.imshow('frame', frame)
-            # cv2.waitKey(0)
+            cv2.imshow('frame', frame)
+
+            # Wait for 1 ms and check if 'q' is pressed
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
     out.release()
     cap.release()
+    cv2.destroyAllWindows()
