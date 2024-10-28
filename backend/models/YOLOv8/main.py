@@ -35,6 +35,7 @@ def getLicensePlatesFromVideo(  # noqa: C901
     show_video_simulation=False,
 ):
     results = {}
+    vehicle_tracker = {}
     video_path = None
 
     if file:
@@ -54,7 +55,7 @@ def getLicensePlatesFromVideo(  # noqa: C901
 
     vehicles = [2, 3, 5, 7]
 
-    license_plate_texts = set()
+    license_plate_texts = {}
     stop_flag = False
 
     # read frames
@@ -78,6 +79,7 @@ def getLicensePlatesFromVideo(  # noqa: C901
             detections_ = []
             for detection in detections.boxes.data.tolist():
                 x1, y1, x2, y2, score, class_id = detection
+
                 if int(class_id) in vehicles:
                     detections_.append([x1, y1, x2, y2, score])
 
@@ -96,12 +98,48 @@ def getLicensePlatesFromVideo(  # noqa: C901
                     # crop license plate
                     license_plate_crop = frame[int(y1) : int(y2), int(x1) : int(x2), :]
 
+                    center_y = (ycar1 + ycar2) / 2
+
                     # process license plate
                     license_plate_crop_gray = cv2.cvtColor(
                         license_plate_crop, cv2.COLOR_BGR2GRAY
                     )
+
+                    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+                    license_plate_crop_gray = clahe.apply(license_plate_crop_gray)
+
+                    # Then apply adaptive thresholding
+                    mean_intensity = np.mean(license_plate_crop_gray)
                     _, license_plate_crop_thresh = cv2.threshold(
-                        license_plate_crop_gray, 64, 255, cv2.THRESH_BINARY_INV
+                        license_plate_crop_gray,
+                        mean_intensity - 20,
+                        255,
+                        cv2.THRESH_BINARY_INV,
+                    )
+
+                    # check direction
+
+                    last_y = None
+
+                    if car_id in vehicle_tracker:
+                        last_y = vehicle_tracker[car_id]['last_position'][1]
+                    else:
+                        vehicle_tracker[car_id] = {
+                            'last_position': ((x1 + x2) / 2, center_y),
+                            'direction': 'unknown',
+                        }
+
+                    # Determine direction
+                    if last_y:
+                        if center_y > last_y:
+                            vehicle_tracker[car_id]['direction'] = 'coming'
+                        elif center_y < last_y:
+                            vehicle_tracker[car_id]['direction'] = 'going'
+
+                    # Update last position
+                    vehicle_tracker[car_id]['last_position'] = (
+                        (xcar1 + xcar2) / 2,
+                        center_y,
                     )
 
                     # read license plate number
@@ -110,10 +148,17 @@ def getLicensePlatesFromVideo(  # noqa: C901
                     )
 
                     if license_plate_text is not None:
-                        license_plate_texts.add(license_plate_text)
+                        license_plate_texts[car_id] = {
+                            'license': license_plate_text,
+                            'direction': vehicle_tracker[car_id]['direction'],
+                            'id': car_id,
+                        }
 
                         results[frame_nmr][car_id] = {
-                            'car': {'bbox': [xcar1, ycar1, xcar2, ycar2]},
+                            'car': {
+                                'bbox': [xcar1, ycar1, xcar2, ycar2],
+                                'direction': vehicle_tracker[car_id]['direction'],
+                            },
                             'license_plate': {
                                 'bbox': [x1, y1, x2, y2],
                                 'text': license_plate_text,
@@ -133,6 +178,6 @@ def getLicensePlatesFromVideo(  # noqa: C901
         )
 
     cap.release()
-    os.remove(video_path)
+    # os.remove(video_path)
 
     return license_plate_texts
