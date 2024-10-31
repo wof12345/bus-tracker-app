@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     debug: bool = True
     database_url: str
     database_name: str = 'vehicle_tracker_app'
-    port: int = 8000
+    port: int = 8001
 
     class Config:
         env_file = '.env'

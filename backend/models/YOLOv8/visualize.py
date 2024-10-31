@@ -42,7 +42,7 @@ def visualize(
     video_path='',
     show_video_simulation=False,
 ):
-    results = pd.read_csv(csv_path)
+    results = pd.read_csv(csv_path, low_memory=False)
 
     output_id = uuid4()
     output_id = ''
@@ -77,6 +77,7 @@ def visualize(
                 'license_crop': None,
                 'license_plate_number': selected_result['license_number'],
                 'direction': selected_result['car_direction'],
+                'car_id': car_id,
             }
 
             cap.set(
@@ -95,7 +96,7 @@ def visualize(
                 )
                 license_crop = frame[int(y1) : int(y2), int(x1) : int(x2), :]
                 license_crop = cv2.resize(
-                    license_crop, (int((x2 - x1) * 400 / (y2 - y1)), 400)
+                    license_crop, (int((x2 - x1) * 100 / (y2 - y1)), 100)
                 )
                 license_plate[car_id]['license_crop'] = license_crop
 
@@ -104,12 +105,11 @@ def visualize(
                 license_plate[car_id]['license_crop'] = None
 
         else:
-            # Handle case when no license plate is found for car_id
             license_plate[car_id] = {
                 'license_crop': None,
                 'license_plate_number': None,
                 'direction': selected_result['car_direction'],
-                # Or any default value or error handling
+                'car_id': car_id,
             }
     frame_nmr = -1
     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
@@ -136,24 +136,29 @@ def visualize(
                         (int(car_x1), int(car_y1)),
                         (int(car_x2), int(car_y2)),
                         (0, 255, 0),
-                        thickness=5,
-                        line_length_x=200,
-                        line_length_y=200,
+                        thickness=2,
+                        line_length_x=100,
+                        line_length_y=100,
                     )
 
                     # Retrieve and display the direction
                     direction_text = license_plate[df_.iloc[row_indx]['car_id']].get(
                         'direction', 'unknown'
                     )
+                    car_id = license_plate[df_.iloc[row_indx]['car_id']].get(
+                        'car_id', ''
+                    )
+
+                    direction_text += f':: {car_id}'
 
                     cv2.putText(
                         frame,
                         f'Direction: {direction_text}',
                         (int(car_x1), int(car_y1) - 50),
                         cv2.FONT_HERSHEY_SIMPLEX,
-                        1,
+                        0.5,
                         (0, 0, 255),
-                        2,
+                        1,
                     )
 
                     # Draw license plate bounding box
@@ -182,7 +187,7 @@ def visualize(
                             :,
                         ] = license_crop
                         frame[
-                            int(car_y1) - H - 400 : int(car_y1) - H - 100,
+                            int(car_y1) - H - 200 : int(car_y1) - H - 100,
                             int((car_x2 + car_x1 - W) / 2) : int(
                                 (car_x2 + car_x1 + W) / 2
                             ),
@@ -191,23 +196,24 @@ def visualize(
                         license_text = license_plate[df_.iloc[row_indx]['car_id']].get(
                             'license_plate_number', ''
                         )
+
                         (text_width, text_height), _ = cv2.getTextSize(
                             license_text,
                             cv2.FONT_HERSHEY_SIMPLEX,
-                            4.3,
-                            17,
+                            1,
+                            1,
                         )
                         cv2.putText(
                             frame,
                             license_text,
                             (
                                 int((car_x2 + car_x1 - text_width) / 2),
-                                int(car_y1 - H - 250 + (text_height / 2)),
+                                int(car_y1 - H - 125 + (text_height / 2)),
                             ),
                             cv2.FONT_HERSHEY_SIMPLEX,
-                            4.3,
+                            1,
                             (0, 0, 0),
-                            17,
+                            3,
                         )
 
                 except Exception as e:
