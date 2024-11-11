@@ -1,63 +1,8 @@
-import string
-import easyocr
-import numpy as np
-import cv2
+from paddleocr import PaddleOCR
 import re
-from pytesseract import pytesseract
 
 
-def update_vehicle_direction(car_id, current_position, vehicle_tracker={}):
-    """
-    Determine the direction of a vehicle based on displacement vectors.
-
-    Args:
-        car_id (int): The ID of the car.
-        current_position (tuple): Current (x, y) position of the car.
-        vehicle_tracker (dict): Dictionary to store vehicle tracking data.
-
-    Returns:
-        dict: Updated vehicle_tracker with direction information.
-    """
-    current_position = np.array(current_position)
-
-    if car_id not in vehicle_tracker:
-        vehicle_tracker[car_id] = {
-            'last_position': current_position,
-            'direction': [],
-        }
-        return vehicle_tracker
-
-    last_position = vehicle_tracker[car_id]['last_position']
-
-    displacement_vector = current_position - last_position
-
-    print(
-        displacement_vector,
-        current_position[1],
-        last_position[1],
-        current_position[1] > last_position[1],
-        current_position[1] < last_position[1],
-        car_id,
-    )
-
-    if current_position[1] > last_position[1]:
-        direction = 'coming'
-    elif current_position[1] < last_position[1]:
-        direction = 'going'
-    else:
-        direction = (
-            vehicle_tracker[car_id]['direction'][-1]
-            if len(vehicle_tracker[car_id]['direction']) > 0
-            else 0
-        )
-
-    vehicle_tracker[car_id]['last_position'] = current_position
-    vehicle_tracker[car_id]['direction'].append(direction)
-
-    return vehicle_tracker
-
-
-reader = easyocr.Reader(['en'], gpu=True)
+reader = PaddleOCR(lang='en', gpu=True)
 
 
 char_to_int = {chr(i): i - 65 for i in range(65, 91)}
@@ -130,16 +75,16 @@ def license_complies_format(text):
     Returns:
         bool: True if the license plate complies with the format, False otherwise.
     """
-    if len(text) <= 3:
+    if len(text) <= 3 or len(text) > 7:
         return False
 
-    for i, char in enumerate(text):
-        if i in [0, 1, 4, 5, 6]:
-            if char not in string.ascii_uppercase and char not in int_to_char.values():
-                return False
-        elif i in [2, 3]:
-            if char not in string.digits and char not in char_to_int.keys():
-                return False
+    # for i, char in enumerate(text):
+    #     if i in [0, 1, 4, 5, 6]:
+    #         if char not in string.ascii_uppercase and char not in int_to_char.values():
+    #             return False
+    #     elif i in [2, 3]:
+    #         if char not in string.digits and char not in char_to_int.keys():
+    #             return False
 
     return True
 
@@ -154,7 +99,7 @@ def format_license(text):
     Returns:
         str: Formatted license plate text.
     """
-    text = re.sub(r'[^a-zA-Z0-9]', '', text)
+
     license_plate_ = ''
     mapping = {
         0: int_to_char,
@@ -165,7 +110,7 @@ def format_license(text):
         2: char_to_int,
         3: char_to_int,
     }
-    print(text, 'test')
+
     for index, letter in enumerate(text):
         if (
             index in mapping
@@ -190,24 +135,42 @@ def read_license_plate(license_plate_crop):
         tuple: Tuple containing the formatted license plate text and its confidence score.
     """
 
-    detections = reader.readtext(license_plate_crop)
+    detections = reader.ocr(license_plate_crop)
 
-    text = pytesseract.image_to_string(license_plate_crop)
+    for line in detections:
+        if not line:
+            continue
+        for word_info in line:
+            text = word_info[1][0]
+            confidence = word_info[1][1]
 
-    print(text)
-
-    # print(detections, 'licesne')
-
-    for detection in detections:
-        bbox, text, score = detection
-
-        text = text.upper().replace(' ', '')
-
-        if license_complies_format(text):
-            return format_license(text), score
-            # return format_license(text), score
+            text = text.upper().replace(' ', '')
+            text = re.sub(r'[^a-zA-Z0-9]', '', text)
+            if license_complies_format(text):
+                # print(text, 'debugtesst')
+                # return format_license(text), score
+                return text, confidence
 
     return 'none', 0
+
+
+def get_highest_average_direction(vehicle_tracker, car_id):
+    direction_counts = {'unknown': 0, 'coming': 0, 'going': 0}
+    total_counts = 0
+
+    directions = vehicle_tracker[car_id]['direction']
+    for direction in directions:
+        if direction in direction_counts:
+            direction_counts[direction] += 1
+            total_counts += 1
+
+    if total_counts == 0:
+        return 'No directions recorded'
+
+    averages = {k: v / total_counts for k, v in direction_counts.items()}
+
+    highest_avg_direction = max(averages, key=averages.get)
+    return [highest_avg_direction, averages[highest_avg_direction]]
 
 
 def get_car(license_plate, vehicle_track_ids):
@@ -253,7 +216,7 @@ def is_plate_near_car(x1, y1, x2, y2, xcar1, ycar1, xcar2, ycar2):
     if x1 >= xcar1 and y1 >= ycar1 and x2 <= xcar2 and y2 <= ycar2:
         return True
 
-    tolerance = 10
+    tolerance = 20
     if (
         x1 >= (xcar1 - tolerance)
         and y1 >= (ycar1 - tolerance)

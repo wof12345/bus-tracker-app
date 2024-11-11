@@ -1,6 +1,4 @@
 import cv2
-
-
 from fastapi import UploadFile
 from ultralytics import YOLO
 from packages.sort.sort import Sort, np
@@ -8,11 +6,13 @@ from models.YOLOv8.util import (
     get_car,
     read_license_plate,
     write_csv,
-    update_vehicle_direction,
     is_plate_near_car,
+    get_highest_average_direction,
 )
-from models.YOLOv8.visualize import visualize
 
+from models.YOLOv8.direction_module import update_vehicle_direction
+from models.YOLOv8.image_processing import process_image
+from models.YOLOv8.visualize import visualize
 
 import os
 
@@ -60,6 +60,7 @@ def getLicensePlatesFromVideo(  # noqa: C901
     # load video
     cap = cv2.VideoCapture(video_path)
 
+    # object class to detect (all vehicles) 2: car, 3: motor_cycle, 5: bus, 7: truck
     vehicles = [2, 3, 5, 7]
 
     stop_flag = False
@@ -122,47 +123,26 @@ def getLicensePlatesFromVideo(  # noqa: C901
                 if matched_plate:
                     lx1, ly1, lx2, ly2, score = matched_plate
 
-                    # Crop the license plate
                     license_plate_crop = frame[
                         int(ly1) : int(ly2), int(lx1) : int(lx2), :
                     ]
 
-                    # Process license plate
-                    license_plate_crop_gray = cv2.cvtColor(
-                        license_plate_crop, cv2.COLOR_BGR2GRAY
-                    )
+                    license_plate_crop_processed = process_image(license_plate_crop)
 
-                    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-                    license_plate_crop_gray = clahe.apply(license_plate_crop_gray)
-
-                    # Apply adaptive thresholding
-                    mean_intensity = np.mean(license_plate_crop_gray)
-                    _, license_plate_crop_thresh = cv2.threshold(
-                        license_plate_crop_gray,
-                        mean_intensity - 20,
-                        255,
-                        cv2.THRESH_BINARY_INV,
-                    )
-
-                    # Read license plate number
                     license_plate_text, license_plate_text_score = read_license_plate(
-                        license_plate_crop_thresh
+                        license_plate_crop_processed
                     )
 
+                # ultimately get a readout of the average calculated direction on the video for the last 5 minutes or a variable time
+                direction = get_highest_average_direction(vehicle_tracker, car_id)
+                direction = direction[0]
                 if license_plate_text is not None:
-                    direction = (
-                        vehicle_tracker[car_id]['direction'][-1]
-                        if vehicle_tracker[car_id]['direction']
-                        else 'unknown'
-                    )
-
-                    print(direction, 'testt')
-
-                    license_plate_texts[car_id] = {
-                        'license': license_plate_text,
-                        'direction': vehicle_tracker[car_id]['direction'],
-                        'id': car_id,
-                    }
+                    if license_plate_text != 'none':
+                        license_plate_texts[car_id] = {
+                            'license': license_plate_text,
+                            'direction': direction,
+                            'id': car_id,
+                        }
 
                     results[frame_nmr][car_id] = {
                         'car': {

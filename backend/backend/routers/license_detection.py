@@ -18,9 +18,9 @@ VIDEO_MIME_TYPES = {
 @router.post('/extract-license-plates')
 def extract_license_plates(
     file: UploadFile = File(...),
-    generate_csv: Optional[bool] = False,
-    output_video: Optional[bool] = False,
-    show_video_simulation: Optional[bool] = False,
+    generate_csv: Optional[bool] = True,
+    output_video: Optional[bool] = True,
+    show_video_simulation: Optional[bool] = True,
     output_path: Optional[str] = None,
     max_frames: Optional[int] = 100,
 ):

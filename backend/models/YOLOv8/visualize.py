@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import pandas as pd
 from uuid import uuid4
+from models.YOLOv8.image_processing import process_image
 
 
 def draw_border(
@@ -98,7 +99,8 @@ def visualize(
                 license_crop = cv2.resize(
                     license_crop, (int((x2 - x1) * 100 / (y2 - y1)), 100)
                 )
-                license_plate[car_id]['license_crop'] = license_crop
+
+                license_plate[car_id]['license_crop'] = process_image(license_crop)
 
             except Exception as e:
                 print(f'Error processing bounding box for car_id {car_id}: {e}')
@@ -151,14 +153,39 @@ def visualize(
 
                     direction_text += f':: {car_id}'
 
+                    text = f'Direction: {direction_text}'
+
+                    font = cv2.FONT_HERSHEY_SIMPLEX
+                    font_scale = 1
+                    thickness = 1
+                    color = (0, 0, 255)  # Text color
+
+                    # Get the text size for background dimensions
+                    (text_width, text_height), baseline = cv2.getTextSize(
+                        text, font, font_scale, thickness
+                    )
+
+                    # Calculate the top-left and bottom-right coordinates for the rectangle
+                    top_left = (int(car_x1), int(car_y1) - 50 - text_height)
+                    bottom_right = (
+                        int(car_x1) + text_width,
+                        int(car_y1) - 50 + baseline,
+                    )
+
+                    # Draw the white rectangle as background
+                    cv2.rectangle(
+                        frame, top_left, bottom_right, (255, 255, 255), -1
+                    )  # -1 fills the rectangle
+
+                    # Draw the text on top of the rectangle
                     cv2.putText(
                         frame,
-                        f'Direction: {direction_text}',
+                        text,
                         (int(car_x1), int(car_y1) - 50),
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        0.5,
-                        (0, 0, 255),
-                        1,
+                        font,
+                        font_scale,
+                        color,
+                        thickness,
                     )
 
                     # Draw license plate bounding box
@@ -178,6 +205,11 @@ def visualize(
                         'license_crop'
                     )
                     if license_crop is not None:
+                        if len(license_crop.shape) == 2:  # Color image
+                            license_crop = cv2.cvtColor(
+                                license_crop, cv2.COLOR_GRAY2BGR
+                            )
+
                         H, W, _ = license_crop.shape
                         frame[
                             int(car_y1) - H - 100 : int(car_y1) - 100,
