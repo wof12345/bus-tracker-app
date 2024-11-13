@@ -1,0 +1,31 @@
+.step > * {
+	transition: 0.2s;
+}
+
+.step-active {
+	@apply border-gray-700 font-semibold text-gray-950;
+}
+
+.step-active .step-circle {
+	background-color: #ecfdf3;
+}
+
+.step-inactive {
+	@apply border-gray-500 border-transparent text-gray-700;
+}
+
+.active-state-inactive {
+	display: none;
+}
+
+.step-panel-inactive {
+	display: none !important;
+}
+
+.step-panel-active {
+	display: block;
+}
+
+.progress-active {
+	/* background-color: #079455 !important; */
+}
