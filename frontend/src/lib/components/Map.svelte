@@ -35,6 +35,14 @@
     }
   }
 
+  function addMarker(coordiantes) {
+    if (marker) {
+      marker.setLatLng(coordiantes);
+    } else {
+      marker = leaflet.marker(coordiantes).addTo(map);
+    }
+  }
+
   onMount(async () => {
     leaflet = (await import("leaflet")).default;
 
@@ -51,14 +59,11 @@
     map.on("click", async function (event) {
       const { lat, lng } = event.latlng;
       coordinates = { lat, lng };
+      let coordinates_array = [lat, lng];
 
       await getAreaName(lat, lng);
 
-      if (marker) {
-        marker.setLatLng([lat, lng]);
-      } else {
-        marker = leaflet.marker([lat, lng]).addTo(map);
-      }
+      addMarker(coordinates_array);
     });
   });
 </script>
