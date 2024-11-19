@@ -14,10 +14,10 @@
 
   function getPrimaryStyle(variant: string) {
     if (variant === "primary") {
-      return "bg-[#BA24D5] border-[#9F1AB1] text-white hover:bg-[#9F1AB1] focus:ring-4 ring-[#9E77ED3D] shadow-xs border";
+      return "bg-primary-600 border-primary-800 text-white hover:bg-primary-800 focus:ring-4 ring-[#9E77ED3D] shadow-xs border";
     }
     if (variant === "primary-disabled") {
-      return "bg-[#BA24D5] border-[#9F1AB1] text-white hover:bg-[#9F1AB1] focus:ring-4 ring-[#9E77ED3D] shadow-xs border disabled";
+      return "bg-[#BA24D5] border-primary-800 text-white hover:bg-primary-800 focus:ring-4 ring-[#9E77ED3D] shadow-xs border disabled";
     }
     if (variant === "approve") {
       return "bg-[#079455] border-[#079455] text-white hover:bg-[#079455] focus:ring-4 ring-[#9E77ED3D] shadow-xs border";
@@ -54,7 +54,7 @@
   class={twMerge(
     ` hover:cursor-pointer disabled:pointer-events-none disabled:opacity-50 ${getPrimaryStyle(
       variant,
-    )} flex h-max w-full min-w-max items-center justify-center gap-2 rounded-lg  px-3.5 py-2.5 text-sm font-semibold transition delay-150`,
+    )} flex h-max w-full min-w-max items-center justify-center gap-2 rounded-lg  px-3.5 py-1.5 text-sm font-semibold transition delay-150`,
     $$props.class,
   )}
 >

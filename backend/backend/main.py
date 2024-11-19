@@ -6,7 +6,11 @@ from pydantic import ValidationError
 from pymongo.errors import PyMongoError
 
 from backend.config import settings
-from backend.routers import license_detection, vehicles
+from backend.routers import license_detection, vehicles, hotspots, auth
+from fastapi import HTTPException, Depends
+from backend.utils.auth_scheme import auth_scheme
+from backend.utils.auth import role_required
+from backend.models.user import RoleEnum
 
 app = FastAPI()
 
@@ -50,12 +54,29 @@ async def mongo_transaction_exception_handler(request: Request, exc: PyMongoErro
     )
 
 
+app.include_router(auth.router, tags=['auth'], prefix='/auth')
+
 app.include_router(
-    license_detection.router, tags=['license-detection'], prefix='/license-detection'
+    license_detection.router,
+    tags=['license-detection'],
+    prefix='/license-detection',
+    dependencies=[Depends(auth_scheme)],
 )
 
 
-app.include_router(vehicles.router, tags=['vehicles'], prefix='/vehicles')
+app.include_router(
+    vehicles.router,
+    tags=['vehicles'],
+    prefix='/vehicles',
+    dependencies=[Depends(role_required([RoleEnum.ADMIN]))],
+)
+
+app.include_router(
+    hotspots.router,
+    tags=['hotspots'],
+    prefix='/hotspots',
+    dependencies=[Depends(role_required([RoleEnum.ADMIN]))],
+)
 
 
 def start():

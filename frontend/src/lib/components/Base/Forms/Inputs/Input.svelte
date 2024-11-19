@@ -42,7 +42,7 @@
 
     <input
       class={twMerge(
-        `w-full bg-transparent outline-none ${disabled ? "cursor-not-allowed" : ""}`,
+        `w-full  bg-transparent outline-none ${disabled ? "cursor-not-allowed" : ""}`,
         $$props.inputClass,
       )}
       {name}

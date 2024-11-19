@@ -8,7 +8,14 @@ class HotspotCreate(BaseModel):
     name: str
     description: Optional[str] = None
     location_name: str
-    coordinates: str
+    coordinates: list[float]
+
+
+class HotspotUpdate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    location_name: str
+    coordinates: list[float]
 
 
 class Hotspot(BaseModel):
@@ -16,9 +23,15 @@ class Hotspot(BaseModel):
     name: str
     location_name: str
     description: Optional[str] = None
-    coordinates: str
+    coordinates: list[float]
 
     class Config:
         populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {BsonObjectId: str}
+
+
+class AllHotspotResponse(BaseModel):
+    total: int
+    page: int
+    data: list[Hotspot]

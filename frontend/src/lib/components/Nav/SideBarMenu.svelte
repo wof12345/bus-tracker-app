@@ -254,14 +254,12 @@
             <div class=" w-[160px]">
               <Paragraph
                 class="truncate text-sm font-semibold text-white md:text-sm"
-                >{($authStore?.user?.first_name || "") +
-                  " " +
-                  ($authStore?.user?.last_name || "")}</Paragraph
+                >{$authStore?.email || ""}</Paragraph
               >
 
               <Paragraph
                 class="truncate text-sm font-normal text-gray-100 md:text-sm"
-                >{$authStore?.user?.email || ""}</Paragraph
+                >{$authStore?.role || ""}</Paragraph
               >
             </div>
 

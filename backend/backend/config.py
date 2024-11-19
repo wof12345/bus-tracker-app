@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     debug: bool = True
     database_url: str
     database_name: str = 'vehicle_tracker_app'
+    secret: str
+    jwt_secret: str
     port: int = 8001
 
     class Config:

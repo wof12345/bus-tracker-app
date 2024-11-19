@@ -3,7 +3,6 @@ from backend.schemas.auth import UserRegisterSchema, UserLoginSchema, TokenRespo
 from backend.services.auth import register_user, login_user, verify_user
 from backend.utils.auth_scheme import auth_scheme
 from backend.models.user import UserResponse
-from backend.services.users import get_user
 
 router = APIRouter()
 
@@ -20,5 +19,4 @@ def login(user: UserLoginSchema):
 
 @router.get('/verify', response_model=UserResponse)
 def verify(user=Depends(auth_scheme)):
-    db_user = get_user(user['id'])
-    return db_user
+    return user

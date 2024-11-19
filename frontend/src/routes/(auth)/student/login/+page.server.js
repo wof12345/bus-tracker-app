@@ -26,7 +26,7 @@ export const actions = {
     let token = cookies.get("token");
 
     try {
-      const res = await api.post("/auth/login", token, fetch, {
+      const res = await api.post("/auth/login/", token, fetch, {
         body: {
           email,
           password,
