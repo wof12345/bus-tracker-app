@@ -1,13 +1,16 @@
-from backend.routers import license_detection
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
-from sqlalchemy.exc import PendingRollbackError
+from pymongo.errors import PyMongoError
 
 from backend.config import settings
-
+from backend.routers import license_detection, vehicles, hotspots, auth
+from fastapi import HTTPException, Depends
+from backend.utils.auth_scheme import auth_scheme
+from backend.utils.auth import role_required
+from backend.models.user import RoleEnum
 
 app = FastAPI()
 
@@ -21,7 +24,7 @@ app.add_middleware(
 
 
 def init_app():
-    print('int')
+    print('init')
 
 
 app.add_event_handler('startup', init_app)
@@ -35,23 +38,44 @@ async def validation_exception_handler(request: Request, exc: ValidationError):
     )
 
 
-@app.exception_handler(PendingRollbackError)
-async def pending_rollback_exception_handler(
-    request: Request, exc: PendingRollbackError
-):
-    if hasattr(request.state, 'db'):
-        request.state.db.rollback()
+@app.exception_handler(PyMongoError)
+async def mongo_transaction_exception_handler(request: Request, exc: PyMongoError):
+    if hasattr(request.state, 'session') and request.state.session:
+        try:
+            await request.state.session.abort_transaction()
+        except Exception as abort_exc:
+            print(f'Failed to abort transaction: {abort_exc}')
 
     return JSONResponse(
         status_code=500,
         content={
-            'message': 'A database error occurred. The transaction has been rolled back.'
+            'message': 'A MongoDB error occurred. The transaction has been aborted.'
         },
     )
 
 
+app.include_router(auth.router, tags=['auth'], prefix='/auth')
+
 app.include_router(
-    license_detection.router, tags=['license-detection'], prefix='/license-detection'
+    license_detection.router,
+    tags=['license-detection'],
+    prefix='/license-detection',
+    dependencies=[Depends(auth_scheme)],
+)
+
+
+app.include_router(
+    vehicles.router,
+    tags=['vehicles'],
+    prefix='/vehicles',
+    dependencies=[Depends(role_required([RoleEnum.ADMIN]))],
+)
+
+app.include_router(
+    hotspots.router,
+    tags=['hotspots'],
+    prefix='/hotspots',
+    dependencies=[Depends(role_required([RoleEnum.ADMIN]))],
 )
 
 

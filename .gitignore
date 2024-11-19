@@ -1,0 +1,16 @@
+.vscode
+.env
+.venv
+.pytest_cache
+__pycache__
+*.tfvars
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars.json
+.terraform.lock.hcl
+*.out
+DS_Store
+*.tfstate.*
+env.yml
+*.code-workspace
