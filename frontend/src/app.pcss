@@ -1,0 +1,65 @@
+/* Write your global styles here, in PostCSS syntax */
+@import "leaflet/dist/leaflet.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Inter", sans-serif;
+}
+
+@layer components {
+  .form-input {
+    @apply w-full  rounded-lg border border-gray-300 bg-white text-md shadow-xs outline-none;
+  }
+
+  .tab-active {
+    @apply border-[#BA24D5] bg-brand-50 text-[#9F1AB1];
+  }
+
+  .tab-inactive {
+    @apply border-gray-500 border-transparent text-gray-500;
+  }
+}
+
+input:checked + div {
+  @apply border-[#D1D5DB] bg-black;
+}
+
+input:checked + div svg {
+  @apply block;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 4px;
+  border-radius: 50px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #eaecf0;
+  border-radius: 90px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #98a2b3;
+}
+
+::-webkit-scrollbar-track {
+  background: #ffffff;
+}
+
+::-webkit-scrollbar-track:hover {
+  background: #ffffff;
+}
+
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+}

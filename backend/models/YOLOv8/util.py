@@ -1,13 +1,14 @@
-import string
-import easyocr
+from paddleocr import PaddleOCR
+import re
 
-# Initialize the OCR reader
-reader = easyocr.Reader(['en'], gpu=False)
 
-# Mapping dictionaries for character conversion
-dict_char_to_int = {'O': '0', 'I': '1', 'J': '3', 'A': '4', 'G': '6', 'S': '5'}
+reader = PaddleOCR(lang='en', gpu=True)
 
-dict_int_to_char = {'0': 'O', '1': 'I', '3': 'J', '4': 'A', '6': 'G', '5': 'S'}
+
+char_to_int = {chr(i): i - 65 for i in range(65, 91)}
+
+
+int_to_char = {i - 65: chr(i) for i in range(65, 91)}
 
 
 def write_csv(results, output_path):
@@ -20,7 +21,7 @@ def write_csv(results, output_path):
     """
     with open(output_path, 'w') as f:
         f.write(
-            '{},{},{},{},{},{},{}\n'.format(
+            '{},{},{},{},{},{},{},{}\n'.format(
                 'frame_nmr',
                 'car_id',
                 'car_bbox',
@@ -28,19 +29,19 @@ def write_csv(results, output_path):
                 'license_plate_bbox_score',
                 'license_number',
                 'license_number_score',
+                'car_direction',
             )
         )
 
         for frame_nmr in results.keys():
             for car_id in results[frame_nmr].keys():
-                print(results[frame_nmr][car_id])
                 if (
                     'car' in results[frame_nmr][car_id].keys()
                     and 'license_plate' in results[frame_nmr][car_id].keys()
                     and 'text' in results[frame_nmr][car_id]['license_plate'].keys()
                 ):
                     f.write(
-                        '{},{},{},{},{},{},{}\n'.format(
+                        '{},{},{},{},{},{},{},{}\n'.format(
                             frame_nmr,
                             car_id,
                             '[{} {} {} {}]'.format(
@@ -58,6 +59,7 @@ def write_csv(results, output_path):
                             results[frame_nmr][car_id]['license_plate']['bbox_score'],
                             results[frame_nmr][car_id]['license_plate']['text'],
                             results[frame_nmr][car_id]['license_plate']['text_score'],
+                            results[frame_nmr][car_id]['car']['direction'],
                         )
                     )
         f.close()
@@ -73,27 +75,18 @@ def license_complies_format(text):
     Returns:
         bool: True if the license plate complies with the format, False otherwise.
     """
-    if len(text) != 7:
+    if len(text) <= 3 or len(text) > 7:
         return False
 
-    if (
-        (text[0] in string.ascii_uppercase or text[0] in dict_int_to_char.keys())
-        and (text[1] in string.ascii_uppercase or text[1] in dict_int_to_char.keys())
-        and (
-            text[2] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-            or text[2] in dict_char_to_int.keys()
-        )
-        and (
-            text[3] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-            or text[3] in dict_char_to_int.keys()
-        )
-        and (text[4] in string.ascii_uppercase or text[4] in dict_int_to_char.keys())
-        and (text[5] in string.ascii_uppercase or text[5] in dict_int_to_char.keys())
-        and (text[6] in string.ascii_uppercase or text[6] in dict_int_to_char.keys())
-    ):
-        return True
-    else:
-        return False
+    # for i, char in enumerate(text):
+    #     if i in [0, 1, 4, 5, 6]:
+    #         if char not in string.ascii_uppercase and char not in int_to_char.values():
+    #             return False
+    #     elif i in [2, 3]:
+    #         if char not in string.digits and char not in char_to_int.keys():
+    #             return False
+
+    return True
 
 
 def format_license(text):
@@ -106,21 +99,27 @@ def format_license(text):
     Returns:
         str: Formatted license plate text.
     """
+
     license_plate_ = ''
     mapping = {
-        0: dict_int_to_char,
-        1: dict_int_to_char,
-        4: dict_int_to_char,
-        5: dict_int_to_char,
-        6: dict_int_to_char,
-        2: dict_char_to_int,
-        3: dict_char_to_int,
+        0: int_to_char,
+        1: int_to_char,
+        4: int_to_char,
+        5: int_to_char,
+        6: int_to_char,
+        2: char_to_int,
+        3: char_to_int,
     }
-    for j in [0, 1, 2, 3, 4, 5, 6]:
-        if text[j] in mapping[j].keys():
-            license_plate_ += mapping[j][text[j]]
+
+    for index, letter in enumerate(text):
+        if (
+            index in mapping
+            and index in mapping[index].keys()
+            and letter in [0, 1, 2, 3, 4, 5, 6]
+        ):
+            license_plate_ += mapping[index][letter]
         else:
-            license_plate_ += text[j]
+            license_plate_ += letter
 
     return license_plate_
 
@@ -136,17 +135,42 @@ def read_license_plate(license_plate_crop):
         tuple: Tuple containing the formatted license plate text and its confidence score.
     """
 
-    detections = reader.readtext(license_plate_crop)
+    detections = reader.ocr(license_plate_crop)
 
-    for detection in detections:
-        bbox, text, score = detection
+    for line in detections:
+        if not line:
+            continue
+        for word_info in line:
+            text = word_info[1][0]
+            confidence = word_info[1][1]
 
-        text = text.upper().replace(' ', '')
+            text = text.upper().replace(' ', '')
+            text = re.sub(r'[^a-zA-Z0-9]', '', text)
+            if license_complies_format(text):
+                # print(text, 'debugtesst')
+                # return format_license(text), score
+                return text, confidence
 
-        if license_complies_format(text):
-            return format_license(text), score
+    return 'none', 0
 
-    return None, None
+
+def get_highest_average_direction(vehicle_tracker, car_id):
+    direction_counts = {'unknown': 0, 'coming': 0, 'going': 0}
+    total_counts = 0
+
+    directions = vehicle_tracker[car_id]['direction']
+    for direction in directions:
+        if direction in direction_counts:
+            direction_counts[direction] += 1
+            total_counts += 1
+
+    if total_counts == 0:
+        return 'No directions recorded'
+
+    averages = {k: v / total_counts for k, v in direction_counts.items()}
+
+    highest_avg_direction = max(averages, key=averages.get)
+    return [highest_avg_direction, averages[highest_avg_direction]]
 
 
 def get_car(license_plate, vehicle_track_ids):
@@ -175,3 +199,30 @@ def get_car(license_plate, vehicle_track_ids):
         return vehicle_track_ids[car_indx]
 
     return -1, -1, -1, -1, -1
+
+
+def is_plate_near_car(x1, y1, x2, y2, xcar1, ycar1, xcar2, ycar2):
+    """
+    Determine if a license plate bounding box (x1, y1, x2, y2) is within or near a car bounding box (xcar1, ycar1, xcar2, ycar2).
+
+    Parameters:
+        x1, y1, x2, y2 (float): Coordinates of the license plate bounding box.
+        xcar1, ycar1, xcar2, ycar2 (float): Coordinates of the car bounding box.
+
+    Returns:
+        bool: True if the license plate is within or near the car's bounding box, False otherwise.
+    """
+
+    if x1 >= xcar1 and y1 >= ycar1 and x2 <= xcar2 and y2 <= ycar2:
+        return True
+
+    tolerance = 20
+    if (
+        x1 >= (xcar1 - tolerance)
+        and y1 >= (ycar1 - tolerance)
+        and x2 <= (xcar2 + tolerance)
+        and y2 <= (ycar2 + tolerance)
+    ):
+        return True
+
+    return False

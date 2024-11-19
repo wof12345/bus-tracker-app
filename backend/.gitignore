@@ -6,4 +6,4 @@ logs/
 .ruff_cache
 .pytest_cache
 app.log
-venv/
+.venv

@@ -1,0 +1,24 @@
+[
+  {
+    "name": "Home",
+    "href": "/home",
+    "subNav": [
+      {
+        "name": "Overview",
+        "href": "/home/overview"
+      }
+    ],
+    "icon": "home.svg"
+  },
+  {
+    "name": "Hotspots",
+    "href": "/hotspots",
+    "subNav": [
+      {
+        "name": "Overview",
+        "href": "/home/overview"
+      }
+    ],
+    "icon": "hotspot.svg"
+  }
+]
