@@ -1,8 +1,8 @@
 <script lang="ts">
   import { v4 as uuidv4 } from "uuid";
   import { clickOutside } from "$components/utils/clickOutside";
-  import Button from "$components/Base/Buttons/Button.svelte";
-  import Paragraph from "$components/Base/Typography/Paragraph.svelte";
+  import { IconCaretDown } from "@tabler/icons-svelte";
+
   export let selectedValue: string[] = [];
   export let label: string;
   export let options: any[] = [];
@@ -116,7 +116,7 @@
             autocomplete="off"
             required
           />
-          <img class="absolute right-3 top-5" src="/down.svg" />
+          <IconCaretDown class="absolute right-3 top-3" />
         </div>
       {/if}
 

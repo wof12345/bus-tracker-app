@@ -1,13 +1,11 @@
 import api from "$lib/api/api";
 
-export const load = async ({ cookies, fetch, url }) => {
+export const load = async ({ cookies, fetch }) => {
   const token = cookies.get("token");
-
-  const page = url.searchParams.get("page") || "1";
 
   const getHotspots = async () => {
     try {
-      let params = { page };
+      let params = { per_page: 1000 };
 
       const request = await api.get("/hotspots/", token, fetch, params);
       const data = await request.json();
@@ -23,20 +21,25 @@ export const load = async ({ cookies, fetch, url }) => {
   };
 };
 
-
 export const actions = {
-  delete: async (event) => {
+  create: async (event) => {
     const { request, cookies, fetch } = event;
 
     const formData = await request.formData();
 
     let token = cookies.get("token");
 
-    let _id = formData.get('_id')
+    let name = formData.get("name");
+    let description = formData.get("description");
 
+    let coordinates = JSON.parse(formData.get("coordinates"));
+    let lines = JSON.parse(formData.get("lines"));
+    let hotspots = JSON.parse(formData.get("hotspots"));
 
     try {
-      const res = await api.del(`/hotspots/${_id}`, token, fetch, {});
+      const res = await api.post("/routes/", token, fetch, {
+        body: { name, lines, description, coordinates, hotspots },
+      });
 
       let data = await res.json();
 

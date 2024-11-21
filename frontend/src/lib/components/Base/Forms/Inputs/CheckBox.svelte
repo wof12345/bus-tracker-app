@@ -10,6 +10,9 @@
   export let checked = false;
   export let focused = false;
 
+  export let disabled = false;
+  export let singleValue = true;
+
   export let valueArray = [];
 
   let isHovered = false;
@@ -17,7 +20,10 @@
 
   const dispatch = createEventDispatcher();
 
-  function handleClick() {
+  function handleClick(e) {
+    if (disabled) return;
+
+    e.stopPropagation();
     checked = !checked;
     dispatch("toggle", { checked, text });
 
@@ -38,7 +44,7 @@
   }
 
   function isChecked() {
-    if (!browser || !valueArray) return;
+    if (!browser || !valueArray || singleValue) return;
 
     let checkValueArray = valueArray.value || valueArray;
 
@@ -56,14 +62,17 @@
   $: isChecked(valueArray);
 </script>
 
-<button class="flex items-center gap-0" on:click={handleClick}>
+<button
+  class="flex items-center gap-0 {disabled ? 'pointer-events-none' : ''}"
+  on:click={handleClick}
+>
   <button
     on:mouseenter={() => (isHovered = true)}
     on:mouseleave={() => (isHovered = false)}
-    class="relative mr-2 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded
+    class="relative mr-2 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border border-primary-300
       {checked
-      ? `bg-[#BA24D5] ${focused ? 'ring-4' : ''} ring-[#9E77ED3D]`
-      : 'border bg-[#f9fafb] ring-[#9E77ED3D] hover:border-[#BA24D5]  hover:bg-[#BA24D5]'}"
+      ? `bg-primary-600 ${focused ? 'ring-4' : ''} ring-primary-100`
+      : 'border bg-[#f9fafb] ring-[#9E77ED3D] hover:border-primary-600  hover:bg-primary-600'}"
   >
     <input
       bind:this={checkboxRef}

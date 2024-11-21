@@ -4,7 +4,7 @@
 
 <div
   class={twMerge(
-    "flex  items-center justify-between border-b border-gray-200 p-6 py-3",
+    "flex  items-center justify-between border-b border-gray-200 p-6 py-5",
     $$props.class,
   )}
 >

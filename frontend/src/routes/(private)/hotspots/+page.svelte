@@ -1,4 +1,5 @@
 <script>
+  import TableHeader from "$components/Tables/Components/TableHeader.svelte";
   import { deserialize } from "$app/forms";
   import { onMount } from "svelte";
   import TableBody from "$components/Base/Table/TableBody.svelte";
@@ -16,6 +17,12 @@
   import { IconEdit, IconTrash } from "@tabler/icons-svelte";
   import HotspotPopup from "$components/HotspotPopup.svelte";
   import { showSpinner } from "$lib/store/spinner.ts";
+  import { validateApiResponse } from "$components/utils/validateApiResponse.js";
+  import { showToaster } from "$lib/store/toaster.ts";
+  import { invalidateAll } from "$app/navigation";
+  import Input from "$components/Base/Forms/Inputs/Input.svelte";
+  import Menu from "$components/Base/Menu/Menu.svelte";
+  import Option from "$components/Base/Forms/Components/Option.svelte";
 
   export let data;
 
@@ -24,6 +31,8 @@
   let popupRef;
   let lastPopup;
 
+  $: popupEditState = false;
+
   let leaflet;
   let map;
   let marker;
@@ -31,11 +40,48 @@
   let placeName = "Click on the map to get the area name";
 
   let selectedItem;
+  let selectedItemRef;
 
   let selectedLocationData;
 
+  let search;
+  let searchResults = [];
+  let searchTimeOut;
+
+  async function getAreaCoords(search) {
+    let form = new FormData();
+
+    form.append("search", search);
+
+    const response = await showSpinner(
+      fetch(`/api/map?/forwardGeoCode`, {
+        method: "POST",
+        body: form,
+      }),
+    );
+
+    const data = deserialize(await response.text());
+
+    searchResults = data.data;
+    console.log(searchResults);
+  }
+
+  async function searchQuery(search) {
+    if (!search || search === "" || searchTimeOut) return;
+
+    searchTimeOut = setTimeout(async () => {
+      getAreaCoords(search);
+      clearTimeout(searchTimeOut);
+      searchTimeOut = undefined;
+    }, 900);
+  }
+
+  $: searchQuery(search);
+
   async function getAreaDetails(lat, lng) {
-    selectedItem = undefined;
+    selectedItemRef = selectedItem = undefined;
+
+    popupEditState = false;
     let form = new FormData();
 
     form.append("lat", lat);
@@ -62,6 +108,11 @@
 
   function selectItem(item) {
     selectedItem = item;
+    selectedItemRef = selectedItem
+      ? JSON.parse(JSON.stringify(selectedItem))
+      : undefined;
+
+    popupEditState = false;
 
     map.setView(item.coordinates);
     addMarker(item.coordinates);
@@ -113,6 +164,14 @@
     });
   }
 
+  async function invokeInformationLocation(lat, lng) {
+    coordinates = { lat, lng };
+    await getAreaDetails(lat, lng);
+    let coordinates_array = [lat, lng];
+
+    addMarker(coordinates_array);
+  }
+
   onMount(async () => {
     leaflet = (await import("leaflet")).default;
 
@@ -130,28 +189,43 @@
 
     map.on("click", async function (event) {
       const { lat, lng } = event.latlng;
-      coordinates = { lat, lng };
-      let coordinates_array = [lat, lng];
 
-      await getAreaDetails(lat, lng);
-
-      addMarker(coordinates_array);
+      invokeInformationLocation(lat, lng);
     });
   });
 </script>
 
-<div id="map"></div>
+<div
+  class="search_anchor absolute top-10 m-auto left-0 right-0 z-[100] max-w-[300px]"
+>
+  <Input bind:value={search} placeholder={"Search a location"} />
+
+  <Menu
+    class="max-h-[400px]"
+    visible={searchResults.length > 0}
+    parentWidth={true}
+    anchorEelement={"search_anchor"}
+  >
+    {#each searchResults as search}
+      <Option
+        onClick={() => {
+          invokeInformationLocation(search.lat, search.lon);
+          searchResults = [];
+        }}>{search.display_name}</Option
+      >
+    {/each}
+  </Menu>
+</div>
+
+<div id="map" class="relative z-0"></div>
 
 <div class="info-container">
   <Section class="flex flex-col gap-0 h-full py-3">
-    <div class="flex items-start justify-between mb-5">
-      <div class="w-full">
-        <h1 class="font-semibold text-[#101828] text-3xl">Hotspots</h1>
-        <p class="font-normal text-[#475467] text-base mt-1">
-          Create or edit hotpots
-        </p>
-      </div>
-    </div>
+    <TableHeader
+      class="mb-3"
+      title="Hotspots"
+      subtitle=" Create or edit hotpots"
+    />
 
     <Table>
       <TableFrame>
@@ -166,8 +240,10 @@
           {#each hotspots.data || [] as item}
             <TableRow
               class="items-center hover:cursor-pointer hover:bg-slate-100"
-              onClick={() => {
+              onClick={(e) => {
                 selectItem(item);
+
+                e.stopPropagation();
               }}
             >
               <TableCell
@@ -183,9 +259,37 @@
                 >{item?.description}</TableCell
               >
               <TableCell
-                class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-                ><TableButton onClick={() => {}}><IconEdit /></TableButton>
-                <TableButton onClick={() => {}}><IconTrash /></TableButton
+                class="col-span-1 flex justify-end gap-3 font-normal text-sm text-[#475467]"
+                ><TableButton
+                  onClick={(e) => {
+                    selectItem(item);
+                    popupEditState = true;
+
+                    e.stopPropagation();
+                  }}><IconEdit /></TableButton
+                >
+                <TableButton
+                  onClick={async (e) => {
+                    e.stopPropagation();
+
+                    let form = new FormData();
+
+                    form.append("_id", item._id);
+
+                    const response = await fetch(`?/delete`, {
+                      method: "POST",
+                      body: form,
+                    });
+
+                    const data = deserialize(await response.text());
+
+                    if (!validateApiResponse(data)) {
+                      return;
+                    }
+
+                    showToaster("Hotspot deleted");
+                    await invalidateAll();
+                  }}><IconTrash /></TableButton
                 ></TableCell
               >
             </TableRow>
@@ -203,8 +307,9 @@
   bind:popupRef
   {placeName}
   {coordinates}
-  {selectedItem}
-  item={selectedItem ? JSON.parse(JSON.stringify(selectedItem)) : undefined}
+  bind:selectedItem
+  bind:item={selectedItemRef}
+  bind:editState={popupEditState}
 />
 
 <style>

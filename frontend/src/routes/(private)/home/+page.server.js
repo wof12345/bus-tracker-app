@@ -1,5 +1,5 @@
 import api from "$lib/api/api";
-export const load = async ({ cookies, fetch, url, params }) => {
+export const load = async ({ cookies, fetch, url }) => {
   const token = cookies.get("token");
 
 
@@ -11,7 +11,7 @@ export const load = async ({ cookies, fetch, url, params }) => {
     try {
       let params = status ? { page, status } : { page };
 
-      const tutorPayouts = await api.get("/payouts/", token, fetch, params);
+      const tutorPayouts = await api.get("/vehicles/", token, fetch, params);
       const data = await tutorPayouts.json();
 
       return data;

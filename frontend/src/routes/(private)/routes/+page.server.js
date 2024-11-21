@@ -5,12 +5,14 @@ export const load = async ({ cookies, fetch, url }) => {
 
   const page = url.searchParams.get("page") || "1";
 
-  const getHotspots = async () => {
+  const getRoutes = async () => {
     try {
       let params = { page };
 
-      const request = await api.get("/hotspots/", token, fetch, params);
+      const request = await api.get("/routes/", token, fetch, params);
       const data = await request.json();
+
+
 
       return data;
     } catch (error) {
@@ -19,12 +21,13 @@ export const load = async ({ cookies, fetch, url }) => {
   };
 
   return {
-    hotspots: await getHotspots(),
+    routes: await getRoutes(),
   };
 };
 
 
 export const actions = {
+
   delete: async (event) => {
     const { request, cookies, fetch } = event;
 
@@ -36,7 +39,7 @@ export const actions = {
 
 
     try {
-      const res = await api.del(`/hotspots/${_id}`, token, fetch, {});
+      const res = await api.del(`/routes/${_id}`, token, fetch, {});
 
       let data = await res.json();
 
