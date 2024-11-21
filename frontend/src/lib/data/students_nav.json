@@ -20,5 +20,16 @@
       }
     ],
     "icon": "hotspot.svg"
+  },
+  {
+    "name": "Buses",
+    "href": "/buses",
+    "subNav": [
+      {
+        "name": "Overview",
+        "href": "/home/overview"
+      }
+    ],
+    "icon": "bus.svg"
   }
 ]

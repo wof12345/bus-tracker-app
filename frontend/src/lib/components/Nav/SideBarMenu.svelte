@@ -44,6 +44,8 @@
       ? navTeacher
       : navStudent;
 
+  $: console.log(navItems, isAdmin($authStore));
+
   export function show() {
     document.body.classList.add("overflow-hidden");
     visible = true;
@@ -143,7 +145,7 @@
       ? 'flex'
       : 'hidden'} max-h-screen min-h-screen md:sticky md:flex"
   >
-    <div class="z-10 flex h-screen w-max min-w-[280px] bg-[#821890] p-4">
+    <div class="z-10 flex h-screen w-max min-w-[280px] bg-primary-800 p-4">
       <div
         class="relative z-10 flex max-h-screen w-full max-w-[311px] flex-col justify-between overflow-hidden font-semibold"
       >
@@ -160,8 +162,8 @@
               class="flex items-center justify-center"
             >
               <a
-                class="flex w-full gap-3 rounded-md px-3 py-2 transition duration-150 ease-linear hover:bg-[#9F1AB1]"
-                class:bg-[#9F1AB1]={pathName?.includes(
+                class="flex w-full gap-3 rounded-md px-3 py-2 transition duration-150 ease-linear hover:bg-primary-600"
+                class:bg-primary-600={pathName?.includes(
                   getPathNameFromString(item.href),
                 )}
                 on:click={() => {
@@ -206,7 +208,7 @@
         </div>
 
         <div class="flex w-full flex-col gap-4 justify-self-end">
-          <button
+          <!-- <button
             on:click={handleNotification}
             class:bg-[#9F1AB1]={pathName?.includes("/notification")}
             class={twMerge(
@@ -241,7 +243,7 @@
               <img class="w-6" src={"/setting.svg"} alt="" />
               <Text class="text-white">Settings</Text>
             </a>
-          </button>
+          </button> -->
 
           <div
             class="flex w-full items-center justify-between gap-2 border-t border-white px-3 py-2 pt-6"

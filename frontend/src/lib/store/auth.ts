@@ -13,15 +13,15 @@ const initialState = {
 const authStore = writable(initialState);
 
 const isAdmin = (store: any = initialState) => {
-  if (store.user?.role === "admin") return true;
+  if (store?.role === "admin") return true;
 };
 
 const isTeacher = (store: any = initialState) => {
-  if (store.user?.role === "tutor") return true;
+  if (store?.role  === "tutor") return true;
 };
 
 const isStudent = (store: any = initialState) => {
-  if (store.user?.role === "student") return true;
+  if (store?.role  === "student") return true;
 };
 
 const logout = async () => {

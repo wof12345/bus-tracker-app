@@ -65,7 +65,7 @@
           onClick={hide}
         />
       {:else}
-        <CloseButton class=" absolute right-4 top-4 z-50 p-2" onClick={hide} />
+        <CloseButton class=" absolute right-4 top-3 z-50 p-1" onClick={hide} />
       {/if}
 
       <slot />

@@ -6,6 +6,9 @@
   import Input from "./Base/Forms/Inputs/Input.svelte";
   import { validateApiResponse } from "./utils/validateApiResponse";
   import { invalidateAll } from "$app/navigation";
+  import InputGroup from "./Base/Forms/Components/InputGroup.svelte";
+  import FormFieldLabel from "./Base/Forms/Components/FormFieldLabel.svelte";
+  import CheckBox from "./Base/Forms/Inputs/CheckBox.svelte";
 
   export let popupRef;
   export let coordinates;
@@ -13,22 +16,25 @@
   export let selectedItem;
   export let item;
 
-  let editState = false;
+  export let editState = false;
 
   let hotspotForm = {
     name: undefined,
     description: undefined,
+    primary: false,
   };
 
   async function editHotspot() {
     let form = new FormData();
 
+    form.append("_id", item._id);
     form.append("name", item.name);
-    form.append("location_name", item.placee_name);
+    form.append("primary", item.primary);
+    form.append("location_name", item.location_name);
     form.append("description", item.description);
     form.append("coordinates", JSON.stringify(item.coordinates));
 
-    const response = await fetch(`/api/hotspots?/create`, {
+    const response = await fetch(`/api/hotspots?/update`, {
       method: "POST",
       body: form,
     });
@@ -39,7 +45,7 @@
       return;
     }
 
-    showToaster("Hotspot created");
+    showToaster("Hotspot updated");
     await invalidateAll();
     editState = false;
   }
@@ -48,6 +54,7 @@
     let form = new FormData();
 
     form.append("name", hotspotForm.name);
+    form.append("primary", hotspotForm.primary);
     form.append("location_name", placeName);
     form.append("description", hotspotForm.description);
     form.append(
@@ -61,8 +68,6 @@
     });
 
     const data = deserialize(await response.text());
-
-    console.log(data);
 
     if (!validateApiResponse(data)) {
       return;
@@ -90,7 +95,7 @@
         <span class="font-bold"> Longitude:</span>
         {item.coordinates[1]}
       </p>
-      <p class="max-w-[200px]">
+      <p class="max-w-[200px]" style="margin: 0px">
         <span class="font-bold"> Area Name:</span>
         {item.location_name}
       </p>
@@ -102,28 +107,44 @@
         <span class="font-bold"> Longitude:</span>
         {coordinates.lng}
       </p>
-      <p class="max-w-[200px]">
+      <p class="max-w-[200px]" style="margin: 0px">
         <span class="font-bold"> Area Name:</span>
         {placeName}
       </p>
     {/if}
 
     {#if item}
-      <Input
-        containerClass="h-[40px]"
-        bind:value={item.name}
-        placeholder={"Enter custom name"}
-        disabled={!editState}
-      />
-      <Input
-        bind:value={item.description}
-        placeholder={"Enter description"}
-        disabled={!editState}
-      />
+      <InputGroup flow="col">
+        <FormFieldLabel>Name :</FormFieldLabel>
+        <Input
+          containerClass="h-[40px]"
+          bind:value={item.name}
+          placeholder={"Enter custom name"}
+          disabled={!editState}
+        />
+      </InputGroup>
+
+      <InputGroup flow="col">
+        <FormFieldLabel>Description :</FormFieldLabel>
+        <Input
+          bind:value={item.description}
+          placeholder={"Enter description"}
+          disabled={!editState}
+        />
+      </InputGroup>
+
+      <InputGroup>
+        <CheckBox
+          disabled={!editState}
+          bind:checked={item.primary}
+          text={"Campus area"}
+        />
+      </InputGroup>
     {/if}
 
     {#if !editState}
       <Button
+        class="mt-2"
         variant="primary"
         onClick={(e) => {
           editState = true;
@@ -132,15 +153,26 @@
       >
     {:else if !item}
       <div class="flex flex-col gap-2">
-        <Input
-          containerClass="h-[40px]"
-          bind:value={hotspotForm.name}
-          placeholder={"Enter custom name"}
-        />
-        <Input
-          bind:value={hotspotForm.description}
-          placeholder={"Enter description"}
-        />
+        <InputGroup flow="col">
+          <FormFieldLabel>Name :</FormFieldLabel>
+          <Input
+            containerClass="h-[40px]"
+            bind:value={hotspotForm.name}
+            placeholder={"Enter custom name"}
+          />
+        </InputGroup>
+
+        <InputGroup flow="col">
+          <FormFieldLabel>Description :</FormFieldLabel>
+          <Input
+            bind:value={hotspotForm.description}
+            placeholder={"Enter description"}
+          />
+        </InputGroup>
+
+        <InputGroup>
+          <CheckBox bind:checked={hotspotForm.primary} text={"Campus area"} />
+        </InputGroup>
       </div>
     {/if}
 
@@ -161,7 +193,6 @@
             if (item) item = JSON.parse(JSON.stringify(selectedItem));
             item = item;
 
-            console.log(item);
             e.stopPropagation();
           }}>Cancel</Button
         >

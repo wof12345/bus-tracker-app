@@ -1,6 +1,4 @@
-from fastapi import APIRouter, HTTPException, Path, Query
-from fastapi.responses import JSONResponse
-from typing import List
+from fastapi import APIRouter, HTTPException, Path
 from pymongo import ReturnDocument
 from backend.models.hotspot import (
     Hotspot,
@@ -78,5 +76,5 @@ def delete_hotspot(id: str = Path(..., title='Hotspot ID')):
     validate_object_id(id)
     result = collection.delete_one({'_id': ObjectId(id)})
     if result.deleted_count == 1:
-        return {'detail': 'Hotspot deleted successfully'}
+        return {'message': 'Hotspot deleted successfully'}
     raise HTTPException(status_code=404, detail='Hotspot not found')

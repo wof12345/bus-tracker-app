@@ -22,7 +22,7 @@
   let opacity = 0;
 
   let width;
-  let minWidth = "max-content";
+  let minWidth = "";
 
   let scrollTop = 0;
   let scrollLeft = 0;
@@ -30,8 +30,6 @@
   export function show() {
     setTimeout(() => {
       visible = true;
-
-      getYScroll();
     }, 50);
   }
 
@@ -39,8 +37,18 @@
     visible = false;
   }
 
+  function runStabilizer(visible) {
+    if (visible) {
+      getYScroll();
+    }
+  }
+
+  $: runStabilizer(visible);
+
   function getYScroll(e) {
     if (!visible) return;
+
+    console.log(visible);
 
     let scrollBarWidth = getScrollBarWidth(false);
 
@@ -60,6 +68,7 @@
       anchorEelement ||
       document.querySelector(`.input-${id}`);
 
+    console.log(anchor);
     if (!anchor) return;
 
     if (anchor) {

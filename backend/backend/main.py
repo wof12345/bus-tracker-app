@@ -6,7 +6,7 @@ from pydantic import ValidationError
 from pymongo.errors import PyMongoError
 
 from backend.config import settings
-from backend.routers import license_detection, vehicles, hotspots, auth
+from backend.routers import license_detection, vehicles, hotspots, auth, routes
 from fastapi import HTTPException, Depends
 from backend.utils.auth_scheme import auth_scheme
 from backend.utils.auth import role_required
@@ -68,6 +68,13 @@ app.include_router(
     vehicles.router,
     tags=['vehicles'],
     prefix='/vehicles',
+    dependencies=[Depends(role_required([RoleEnum.ADMIN]))],
+)
+
+app.include_router(
+    routes.router,
+    tags=['routes'],
+    prefix='/routes',
     dependencies=[Depends(role_required([RoleEnum.ADMIN]))],
 )
 

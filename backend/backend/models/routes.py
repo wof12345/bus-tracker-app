@@ -2,31 +2,32 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from backend.models.object_id import PyObjectId
 from bson import ObjectId as BsonObjectId
+from backend.models.hotspot import Hotspot
 
 
-class VehicleCreate(BaseModel):
+class RouteCreate(BaseModel):
     name: str
-    license: str
     description: Optional[str] = None
-    driver: Optional[str] = None
-    current_coordinates: Optional[list[Optional[str]]] = None
+    coordinates: list[list[float]]
+    lines: list[list[float]]
+    hotspots: list[Hotspot]
 
 
-class VehicleUpdate(BaseModel):
+class RouteUpdate(BaseModel):
     name: str
-    license: str
     description: Optional[str] = None
-    driver: Optional[str] = None
-    current_coordinates: Optional[list[Optional[str]]] = None
+    lines: list[list[float]]
+    coordinates: list[list[float]]
+    hotspots: list[Hotspot]
 
 
-class Vehicle(BaseModel):
+class Route(BaseModel):
     id: PyObjectId = Field(alias='_id')
     name: str
-    license: str
     description: Optional[str] = None
-    driver: Optional[str] = None
-    current_coordinates: Optional[list[Optional[str]]] = None
+    lines: list[list[float]]
+    coordinates: list[list[float]]
+    hotspots: list[Hotspot]
 
     class Config:
         populate_by_name = True
@@ -34,7 +35,7 @@ class Vehicle(BaseModel):
         json_encoders = {BsonObjectId: str}
 
 
-class AllVehicleResponse(BaseModel):
+class AllRouteResponse(BaseModel):
     total: int
     page: int
-    data: list[Vehicle]
+    data: list[Route]

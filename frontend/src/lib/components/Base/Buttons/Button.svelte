@@ -14,17 +14,17 @@
 
   function getPrimaryStyle(variant: string) {
     if (variant === "primary") {
-      return "bg-primary-600 border-primary-800 text-white hover:bg-primary-800 focus:ring-4 ring-[#9E77ED3D] shadow-xs border";
+      return "bg-primary-600 border-primary-800 text-white hover:bg-primary-800 focus:ring-4 ring-primary-200 shadow-xs border";
     }
     if (variant === "primary-disabled") {
-      return "bg-[#BA24D5] border-primary-800 text-white hover:bg-primary-800 focus:ring-4 ring-[#9E77ED3D] shadow-xs border disabled";
+      return "bg-[#BA24D5] border-primary-800 text-white hover:bg-primary-800 focus:ring-4 ring-primary-200 shadow-xs border disabled";
     }
     if (variant === "approve") {
-      return "bg-[#079455] border-[#079455] text-white hover:bg-[#079455] focus:ring-4 ring-[#9E77ED3D] shadow-xs border";
+      return "bg-[#079455] border-[#079455] text-white hover:bg-[#079455] focus:ring-4 ring-primary-200 shadow-xs border";
     }
 
     if (variant === "danger") {
-      return "bg-[#D92D20] border-[#D92D20] text-white hover:bg-[#D92D20] focus:ring-4 ring-[#9E77ED3D] shadow-xs border";
+      return "bg-[#D92D20] border-[#D92D20] text-white hover:bg-[#D92D20] focus:ring-4 ring-primary-200 shadow-xs border";
     }
 
     if (variant === "secondary") {
