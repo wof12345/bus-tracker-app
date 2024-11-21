@@ -11,12 +11,12 @@
   import ModalHeader from "$components/Base/Modal/ModalHeader.svelte";
   import Modal from "$components/Base/Modal/Modal.svelte";
   import Button from "$lib/components/Base/Buttons/Button.svelte";
-  import { invalidateAll } from "$app/navigation";
+  import { goto, invalidateAll } from "$app/navigation";
   import { showToaster } from "$lib/store/toaster.ts";
   import { validateApiResponse } from "$components/utils/validateApiResponse";
   import { deserialize } from "$app/forms";
   import TableButton from "$components/Base/Table/Components/TableButton.svelte";
-  import { IconTrash, IconEdit } from "@tabler/icons-svelte";
+  import { IconTrash, IconEdit, IconLiveView } from "@tabler/icons-svelte";
   import Section from "$components/Base/Layout/Section.svelte";
   import TableHeader from "$components/Tables/Components/TableHeader.svelte";
 
@@ -138,6 +138,7 @@
           <TableBodyHeader class="col-span-1">Name</TableBodyHeader>
           <TableBodyHeader class="col-span-1">License</TableBodyHeader>
           <TableBodyHeader class="col-span-1">Driver</TableBodyHeader>
+          <TableBodyHeader class="col-span-1">Status</TableBodyHeader>
           <TableBodyHeader class="col-span-1"></TableBodyHeader>
         </TableHeaderRow>
 
@@ -159,8 +160,20 @@
               >{item.driver}</TableCell
             >
             <TableCell
+              class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
+              >{item.status ?? "Stopped"}</TableCell
+            >
+
+            <TableCell
               class="col-span-1 flex justify-end gap-3 font-normal text-sm text-[#475467]"
-              ><TableButton
+            >
+              <TableButton
+                onClick={(e) => {
+                  goto("/live");
+                  e.stopPropagation();
+                }}><IconLiveView /></TableButton
+              >
+              <TableButton
                 onClick={(e) => {
                   selectItem(item);
                   editModal.show();

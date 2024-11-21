@@ -25,7 +25,7 @@ export async function handleFetch({ request, fetch }) {
   const fullPath = `${path}${queryParams ? "?" + queryParams : ""}`;
 
   //logs for debug purpose
-  // console.log(request.url, url);
+  console.log(request.url, url);
   if (request.url.includes('localhost'))
     request = new Request(`${PUBLIC_BASE_URL}${fullPath}`, request);
   // request = new Request(url, request);

@@ -44,7 +44,7 @@
       ? navTeacher
       : navStudent;
 
-  $: console.log(navItems, isAdmin($authStore));
+  // $: console.log(navItems, isAdmin($authStore));
 
   export function show() {
     document.body.classList.add("overflow-hidden");
