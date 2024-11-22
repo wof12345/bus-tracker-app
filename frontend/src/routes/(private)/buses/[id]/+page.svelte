@@ -25,6 +25,11 @@
   import TextArea from "$components/Base/Forms/Inputs/TextArea.svelte";
   import Button from "$components/Base/Buttons/Button.svelte";
   import { onMount } from "svelte";
+  import { deserialize } from "$app/forms";
+  import { validateApiResponse } from "$components/utils/validateApiResponse.js";
+  import { showToaster } from "$lib/store/toaster.ts";
+  import { invalidateAll } from "$app/navigation";
+  import { validateInput } from "$components/utils/validation/validation.js";
 
   export let data;
 
@@ -34,6 +39,16 @@
 
   $: hotspots = data.hotspots.data;
 
+  $: reservations = data.reservations.data;
+
+  $: drivers = data.drivers.data;
+
+  $: helpers = data.helpers.data;
+
+  const hours = Array.from({ length: 12 }, (_, i) => i + 1);
+  const minutes = Array.from({ length: 60 }, (_, i) => i);
+  const clock = ["AM", "PM"];
+
   let hotspotOptions;
   let driverOptions;
   let routeOptions;
@@ -42,46 +57,123 @@
 
   let editState = false;
 
+  let timeForm = {
+    hour: "",
+    minute: "",
+    clock: "",
+  };
+
   let busForm = {
-    description: "Select one",
-    starting_point: "Select one",
-    route: "Select one",
-    reservation: "Select one",
-    driver: "Select one",
-    helper: "Select one",
-    name: "Select one",
-    license: "Select one",
-    time: "Select one",
+    starting_point: "",
+    route: "",
+    reservation: "",
+    driver: "",
+    helper: "",
+    time: "",
+    name: "",
+    description: "",
+    license: "",
   };
 
   function populateData(data) {
     if (!data) return;
-
-    busForm.description = vehicle.description;
-    busForm.name = vehicle.name;
-    busForm.license = vehicle.license;
 
     hotspotOptions = hotspots.map(
       (elm) =>
         new Object({
           ...elm,
           value: elm._id,
-          name: elm.name + ` - (${elm.location_name})`,
+          view_name: elm.name + ` - (${elm.location_name})`,
         }),
     );
+
     routeOptions = routes.map((elm) => new Object({ ...elm, value: elm._id }));
-    reservationOptions = hotspots.map(
+
+    reservationOptions = reservations.map(
       (elm) => new Object({ ...elm, value: elm._id }),
     );
-    driverOptions = hotspots.map(
-      (elm) => new Object({ ...elm, value: elm._id }),
+
+    driverOptions = drivers.map(
+      (elm) =>
+        new Object({
+          ...elm,
+          value: elm._id,
+          view_name: elm.first_name + " " + elm.last_name,
+        }),
     );
-    helperOptions = hotspots.map(
-      (elm) => new Object({ ...elm, value: elm._id }),
+
+    helperOptions = helpers.map(
+      (elm) =>
+        new Object({
+          ...elm,
+          value: elm._id,
+          view_name: elm.first_name + " " + elm.last_name,
+        }),
     );
   }
 
   $: populateData(data);
+
+  function fillFormData() {
+    busForm = JSON.parse(JSON.stringify(vehicle));
+
+    let time = busForm.time.split(":");
+
+    timeForm.hour = time[0];
+    timeForm.minute = time[1];
+    timeForm.clock = time[2];
+  }
+
+  $: fillFormData(vehicle);
+  async function edit() {
+    let form = new FormData();
+
+    busForm.time = timeForm.hour + ":" + timeForm.minute + ":" + timeForm.clock;
+
+    if (
+      !validateInput(busForm, [
+        "driver",
+        "helper",
+        "route",
+        "reservation",
+        "starting_point",
+        "current_coordinates",
+        "time",
+      ])
+    ) {
+      busForm = busForm;
+
+      showToaster("Empty required fields");
+      return;
+    }
+
+    form.append("_id", vehicle._id);
+    form.append("name", busForm.name);
+    form.append("description", busForm.description);
+    form.append("license", busForm.license);
+    form.append("driver", JSON.stringify(busForm.driver));
+    form.append("helper", JSON.stringify(busForm.helper));
+    form.append("route", JSON.stringify(busForm.route));
+    form.append("reservation", JSON.stringify(busForm.reservation));
+    form.append("starting_point", JSON.stringify(busForm.starting_point));
+    form.append("time", JSON.stringify(busForm.time));
+
+    const response = await fetch(`/buses?/update`, {
+      method: "POST",
+      body: form,
+    });
+
+    const data = deserialize(await response.text());
+
+    if (!validateApiResponse(data)) {
+      return;
+    }
+
+    showToaster("Bus updated");
+    editState = false;
+    await invalidateAll();
+  }
+
   onMount(() => {});
 </script>
 
@@ -130,11 +222,26 @@
 
           <InputGroup flow="col">
             <FormFieldLabel>Starting time</FormFieldLabel>
-            <SearchDropdown
-              disabled={!editState}
-              bind:value={busForm.helper}
-              options={helperOptions}
-            />
+            <div class="flex gap-2">
+              <SearchDropdown
+                placeholder={"Hour"}
+                disabled={!editState}
+                bind:value={timeForm.hour}
+                options={hours}
+              />
+              <SearchDropdown
+                placeholder={"Minutes"}
+                disabled={!editState}
+                bind:value={timeForm.minute}
+                options={minutes}
+              />
+              <SearchDropdown
+                placeholder={"Clock"}
+                disabled={!editState}
+                bind:value={timeForm.clock}
+                options={clock}
+              />
+            </div>
           </InputGroup>
 
           <InputGroup flow="col">
@@ -183,7 +290,12 @@
               class="w-max">Edit</Button
             >
           {:else}
-            <Button onClick={() => {}} class="w-max">Update</Button>
+            <Button
+              onClick={() => {
+                edit();
+              }}
+              class="w-max">Update</Button
+            >
 
             <Button
               onClick={() => {

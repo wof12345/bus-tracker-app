@@ -41,7 +41,9 @@
     }
 
     filteredOptions = $$props.options.filter((elm: any) =>
-      (elm.name || elm).toLowerCase().includes(keyword.toLowerCase()),
+      (elm.view_name || elm.name || elm)
+        .toLowerCase()
+        .includes(keyword.toLowerCase()),
     );
   }
 
@@ -57,7 +59,7 @@
     {disabled}
     extractValue={true}
     bind:open={menuOpen}
-    {placeholder}
+    bind:placeholder
     {relativeScrollElement}
     bind:value
     on:change

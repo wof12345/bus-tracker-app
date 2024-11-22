@@ -39,7 +39,9 @@
 
   function runStabilizer(visible) {
     if (visible) {
-      getYScroll();
+      setTimeout(() => {
+        getYScroll();
+      }, 50);
     }
   }
 
@@ -47,8 +49,6 @@
 
   function getYScroll(e) {
     if (!visible) return;
-
-    console.log(visible);
 
     let scrollBarWidth = getScrollBarWidth(false);
 
@@ -68,7 +68,6 @@
       anchorEelement ||
       document.querySelector(`.input-${id}`);
 
-    console.log(anchor);
     if (!anchor) return;
 
     if (anchor) {
@@ -78,8 +77,7 @@
 
       leftPosition = Math.floor(anchorRect.left - (e ? 0 : scrollBarWidth / 2));
 
-      let leftOffset =
-        leftPosition + menu?.getBoundingClientRect().width + left;
+      let leftOffset = leftPosition + left;
 
       let topOffset = topPosition + menu?.getBoundingClientRect().height + 20;
 
@@ -137,7 +135,7 @@
       transition:fade={{ duration: 100 }}
       bind:this={menu}
       class={twMerge(
-        `menu-${id} fixed z-50 flex w-max  overflow-auto rounded-lg bg-white shadow-md `,
+        `menu-${id} fixed z-50 flex w-max  overflow-auto rounded-lg bg-white shadow-md opacity-0`,
         $$props.class,
       )}
       style={width

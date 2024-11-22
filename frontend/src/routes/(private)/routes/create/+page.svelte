@@ -266,29 +266,31 @@
 </script>
 
 <div class="flex flex-row h-full">
-  <div
-    class="search_anchor absolute top-10 m-auto left-0 right-0 z-[100] max-w-[300px]"
-  >
-    <Input bind:value={search} placeholder={"Search a location"} />
-
-    <Menu
-      class="max-h-[400px]"
-      visible={searchResults.length > 0}
-      parentWidth={true}
-      anchorEelement={"search_anchor"}
+  <div class="w-full relative">
+    <div
+      class="search_anchor absolute top-10 m-auto left-0 right-0 z-[100] max-w-[300px]"
     >
-      {#each searchResults as search}
-        <Option
-          onClick={() => {
-            invokeInformationLocation(search.lat, search.lon);
-            searchResults = [];
-          }}>{search.display_name}</Option
-        >
-      {/each}
-    </Menu>
-  </div>
+      <Input bind:value={search} placeholder={"Search a location"} />
 
-  <div id="map" class="relative z-0"></div>
+      <Menu
+        class="max-h-[400px]"
+        visible={searchResults.length > 0}
+        parentWidth={true}
+        anchorEelement={"search_anchor"}
+      >
+        {#each searchResults as search}
+          <Option
+            onClick={() => {
+              invokeInformationLocation(search.lat, search.lon);
+              searchResults = [];
+            }}>{search.display_name}</Option
+          >
+        {/each}
+      </Menu>
+    </div>
+
+    <div id="map" class="relative z-0"></div>
+  </div>
 
   <div class="bg-white rounded-md flex flex-col p-4 gap-4">
     <div class="flex justify-between gap-3">

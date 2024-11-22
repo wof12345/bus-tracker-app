@@ -21,6 +21,8 @@
   import { validateApiResponse } from "$components/utils/validateApiResponse";
   import { validateInput } from "$components/utils/validation/validation.js";
   import { showToaster } from "$lib/store/toaster";
+  import Menu from "$components/Base/Menu/Menu.svelte";
+  import Option from "$components/Base/Forms/Components/Option.svelte";
 
   export let data;
 
@@ -36,6 +38,8 @@
   let mapData = [];
 
   let totalLine = [];
+
+  let marker;
 
   let routeForm = {
     name: "",
@@ -208,6 +212,54 @@
     }
   }
 
+  async function getAreaCoords(search) {
+    let form = new FormData();
+
+    form.append("search", search);
+
+    const response = await showSpinner(
+      fetch(`/api/map?/forwardGeoCode`, {
+        method: "POST",
+        body: form,
+      }),
+    );
+
+    const data = deserialize(await response.text());
+
+    searchResults = data.data;
+  }
+
+  let search;
+  let searchResults = [];
+  let searchTimeOut;
+  async function searchQuery(search) {
+    if (!search || search === "" || searchTimeOut) return;
+
+    searchTimeOut = setTimeout(async () => {
+      getAreaCoords(search);
+      clearTimeout(searchTimeOut);
+      searchTimeOut = undefined;
+    }, 900);
+  }
+
+  $: searchQuery(search);
+
+  function addMarkerMap(coordiantes) {
+    map.setView(coordiantes);
+
+    if (marker) {
+      marker.setLatLng(coordiantes);
+    } else {
+      marker = leaflet.marker(coordiantes).addTo(map);
+    }
+  }
+
+  async function invokeInformationLocation(lat, lng) {
+    let coordinates_array = [lat, lng];
+
+    addMarkerMap(coordinates_array);
+  }
+
   onMount(async () => {
     leaflet = (await import("leaflet")).default;
 
@@ -243,7 +295,31 @@
 </script>
 
 <div class="flex flex-row h-full">
-  <div id="map"></div>
+  <div class="w-full relative">
+    <div
+      class="search_anchor absolute top-10 m-auto left-0 right-0 z-[100] max-w-[300px]"
+    >
+      <Input bind:value={search} placeholder={"Search a location"} />
+
+      <Menu
+        class="max-h-[400px]"
+        visible={searchResults.length > 0}
+        parentWidth={true}
+        anchorEelement={"search_anchor"}
+      >
+        {#each searchResults as search}
+          <Option
+            onClick={() => {
+              invokeInformationLocation(search.lat, search.lon);
+              searchResults = [];
+            }}>{search.display_name}</Option
+          >
+        {/each}
+      </Menu>
+    </div>
+
+    <div id="map" class="relative z-0"></div>
+  </div>
 
   <div class="bg-white rounded-md flex flex-col p-4 gap-4">
     <div class="flex justify-between gap-3">

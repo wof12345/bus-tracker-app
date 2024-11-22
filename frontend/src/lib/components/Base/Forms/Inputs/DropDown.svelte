@@ -32,6 +32,7 @@
   export let relativeScrollElement;
   export let areaDropDown = false;
   export let showIconX = false;
+  export let getFullValue = true;
 
   let textColor = false;
 
@@ -42,17 +43,11 @@
   let selectedItem;
 
   const handleClick = (idx: number, option: any, selectedElm: any) => {
-    value = formData[name] = option.value || option;
-
+    if (getFullValue) value = selectedElm + "";
+    else value = formData[name] = option.value || option;
     active = option.value;
 
     selectedIcon = option.icon;
-
-    if (selectedElm) {
-      var tmp = document.createElement("div");
-      tmp.appendChild(selectedElm);
-      selectedItem = "" + tmp.innerHTML;
-    }
 
     onSelect(idx, option);
     if (onSelectCloseMenu) itemMenu.hide();
@@ -80,10 +75,11 @@
     textColor = true;
     options.forEach((item) => {
       if (item.value === value) {
-        placeholder = item.name;
+        placeholder = item.view_name || item.name;
         textColor = true;
       }
     });
+    placeholder = "";
     value = undefined;
   }
 </script>
@@ -125,13 +121,17 @@
             type={type === "string" ? "text" : type}
             {name}
             placeholder={placeholder ||
+              options[active]?.view_name ||
               options[active]?.name ||
               options[active] ||
               label + ""}
-            value={value?.name ||
+            value={value?.view_name ||
+              value?.name ||
+              getValue(value)?.view_name ||
               getValue(value)?.name ||
               (typeof value === "string" ? value : undefined) ||
-              ""}
+              placeholder ||
+              "- Select one -"}
             onkeypress={!editable ? "return false" : ""}
             autocomplete="off"
             {disabled}
@@ -151,10 +151,13 @@
             type={type === "string" ? "text" : type}
             {name}
             placeholder={placeholder ||
+              value?.view_name ||
               options[active]?.name ||
               options[active] ||
               label + ""}
-            value={value?.name ||
+            value={value?.view_name ||
+              value?.name ||
+              getValue(value)?.view_name ||
               getValue(value)?.name ||
               (typeof value === "string" ? value : undefined) ||
               ""}

@@ -87,7 +87,17 @@
   async function edit() {
     let form = new FormData();
 
-    if (!validateInput(selectedBusRef, ["driver", "current_coordinates"])) {
+    if (
+      !validateInput(selectedBusRef, [
+        "driver",
+        "helper",
+        "route",
+        "reservation",
+        "starting_point",
+        "current_coordinates",
+        "time",
+      ])
+    ) {
       selectedBusRef = selectedBusRef;
       showToaster("Empty required fields");
       return;
@@ -97,7 +107,6 @@
     form.append("name", selectedBusRef.name);
     form.append("description", selectedBusRef.description);
     form.append("license", selectedBusRef.license);
-    form.append("driver", selectedBusRef.driver);
     form.append(
       "coordinates",
       JSON.stringify(selectedBusRef.current_coordinates),
@@ -159,7 +168,7 @@
             >
             <TableCell
               class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-              >{item.driver}</TableCell
+              >{item.driver?.first_name || "Not assigned"}</TableCell
             >
             <TableCell
               class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
@@ -240,11 +249,6 @@
       <FormFieldLabel>License*</FormFieldLabel>
       <Input bind:value={busCreateForm.license} placeholder="Plate text" />
     </InputGroup>
-
-    <InputGroup flow="col">
-      <FormFieldLabel>Driver</FormFieldLabel>
-      <Input bind:value={busCreateForm.driver} placeholder="Driver name" />
-    </InputGroup>
   </ModalBody>
 
   <ModalFooter class="gap-2">
@@ -285,11 +289,6 @@
     <InputGroup flow="col">
       <FormFieldLabel>License*</FormFieldLabel>
       <Input bind:value={selectedBusRef.license} placeholder="Plate text" />
-    </InputGroup>
-
-    <InputGroup flow="col">
-      <FormFieldLabel>Driver</FormFieldLabel>
-      <Input bind:value={selectedBusRef.driver} placeholder="Driver name" />
     </InputGroup>
   </ModalBody>
 

@@ -64,11 +64,11 @@
       <Option
         value={option?.value || option}
         onClick={(value, icon) => {
-          handleClick(idx, { value, icon });
+          handleClick(idx, { value, icon }, option);
         }}
         icon={option.icon}
       >
-        {option?.name || option}
+        {option?.view_name || option?.name || option}
       </Option>
     {/each}
     <!-- TODO: it may be needs for dropdown control -->

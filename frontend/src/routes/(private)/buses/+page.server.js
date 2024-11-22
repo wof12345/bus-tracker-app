@@ -12,8 +12,6 @@ export const load = async ({ cookies, fetch, url }) => {
       const request = await api.get("/vehicles/", token, fetch, params);
       const data = await request.json();
 
-
-
       return data;
     } catch (error) {
       return { error: error?.detail || "Something went wrong!" };
@@ -25,7 +23,6 @@ export const load = async ({ cookies, fetch, url }) => {
   };
 };
 
-
 export const actions = {
   create: async (event) => {
     const { request, cookies, fetch } = event;
@@ -34,14 +31,16 @@ export const actions = {
 
     let token = cookies.get("token");
 
-    let name = formData.get('name')
-    let description = formData.get('description')
-    let license = formData.get('license')
-    let current_coordinates = JSON.parse(formData.get('coordinates'))
-    let driver = formData.get('driver')
+    let name = formData.get("name");
+    let description = formData.get("description");
+    let license = formData.get("license");
+    let current_coordinates = JSON.parse(formData.get("coordinates"));
+
 
     try {
-      const res = await api.post("/vehicles/", token, fetch, { body: { name, driver, description, current_coordinates, license } });
+      const res = await api.post("/vehicles/", token, fetch, {
+        body: { name, description, current_coordinates, license },
+      });
 
       let data = await res.json();
 
@@ -58,15 +57,43 @@ export const actions = {
 
     let token = cookies.get("token");
 
-    let _id = formData.get('_id')
-    let name = formData.get('name')
-    let description = formData.get('description')
-    let license = formData.get('license')
-    let current_coordinates = JSON.parse(formData.get('coordinates'))
-    let driver = formData.get('driver')
+    let _id = formData.get("_id");
+    let name = formData.get("name");
+    let description = formData.get("description");
+    let license = formData.get("license");
+    let current_coordinates = JSON.parse(formData.get("coordinates"));
+    let driver = JSON.parse(formData.get("driver"));
+    let helper = JSON.parse(formData.get("helper"));
+    let reservation = JSON.parse(formData.get("reservation"));
+    let route = JSON.parse(formData.get("route"));
+    let starting_point = JSON.parse(formData.get("starting_point"));
+    let time = JSON.parse(formData.get("time"));
 
+    let preBody = {
+      name,
+      driver,
+      description,
+      current_coordinates,
+      license,
+      helper,
+      time,
+      reservation,
+      route,
+      starting_point,
+    };
+
+    let body = { name, description, license };
+    for (let key in preBody) {
+      if (preBody[key]) {
+        body[key] = preBody[key];
+      }
+    }
+
+    console.log(body);
     try {
-      const res = await api.put(`/vehicles/${_id}`, token, fetch, { body: { name, driver, description, current_coordinates, license } });
+      const res = await api.put(`/vehicles/${_id}`, token, fetch, {
+        body: body,
+      });
 
       let data = await res.json();
 
@@ -83,8 +110,7 @@ export const actions = {
 
     let token = cookies.get("token");
 
-    let _id = formData.get('_id')
-
+    let _id = formData.get("_id");
 
     try {
       const res = await api.del(`/vehicles/${_id}`, token, fetch, {});
