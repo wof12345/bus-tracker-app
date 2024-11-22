@@ -12,16 +12,22 @@ const initialState = {
 
 const authStore = writable(initialState);
 
-const isAdmin = (store: any = initialState) => {
+const isAdmin = (store = initialState) => {
   if (store?.role === "admin") return true;
 };
 
-const isTeacher = (store: any = initialState) => {
-  if (store?.role  === "tutor") return true;
+const isCommuter = (store = initialState) => {
+  if (store?.role === "commuter") return true;
+};
+const isDriver = (store = initialState) => {
+  if (store?.role === "driver") return true;
+};
+const isHelper = (store = initialState) => {
+  if (store?.role === "helper") return true;
 };
 
-const isStudent = (store: any = initialState) => {
-  if (store?.role  === "student") return true;
+const isManager = (store = initialState) => {
+  if (store?.role === "manager") return true;
 };
 
 const logout = async () => {
@@ -42,4 +48,12 @@ const logout = async () => {
   }
 };
 
-export { authStore, isAdmin, isTeacher, isStudent, logout };
+export {
+  authStore,
+  isAdmin,
+  isCommuter,
+  isDriver,
+  isManager,
+  isHelper,
+  logout,
+};

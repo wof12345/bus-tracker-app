@@ -56,7 +56,7 @@
 </script>
 
 <InputContainer {disabled} bind:error {value}>
-  <InputFrame {error} {name}>
+  <InputFrame {error} {name} {disabled}>
     <textarea
       bind:this={textarea}
       class={twMerge(

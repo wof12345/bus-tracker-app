@@ -16,7 +16,7 @@
   import TableButton from "$components/Base/Table/Components/TableButton.svelte";
   import { IconEdit, IconTrash } from "@tabler/icons-svelte";
   import HotspotPopup from "$components/HotspotPopup.svelte";
-  import { showSpinner } from "$lib/store/spinner.ts";
+  import { showSpinner } from "$lib/store/spinner.js";
   import { validateApiResponse } from "$components/utils/validateApiResponse.js";
   import { showToaster } from "$lib/store/toaster.ts";
   import { invalidateAll } from "$app/navigation";
@@ -63,20 +63,7 @@
     const data = deserialize(await response.text());
 
     searchResults = data.data;
-    console.log(searchResults);
   }
-
-  async function searchQuery(search) {
-    if (!search || search === "" || searchTimeOut) return;
-
-    searchTimeOut = setTimeout(async () => {
-      getAreaCoords(search);
-      clearTimeout(searchTimeOut);
-      searchTimeOut = undefined;
-    }, 900);
-  }
-
-  $: searchQuery(search);
 
   async function getAreaDetails(lat, lng) {
     selectedItemRef = selectedItem = undefined;
@@ -105,6 +92,18 @@
       placeName = "Area name not found";
     }
   }
+
+  async function searchQuery(search) {
+    if (!search || search === "" || searchTimeOut) return;
+
+    searchTimeOut = setTimeout(async () => {
+      getAreaCoords(search);
+      clearTimeout(searchTimeOut);
+      searchTimeOut = undefined;
+    }, 900);
+  }
+
+  $: searchQuery(search);
 
   function selectItem(item) {
     selectedItem = item;

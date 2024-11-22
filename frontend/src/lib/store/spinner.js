@@ -8,9 +8,9 @@ let initialState = {
 const spinnerStore = writable(initialState);
 
 async function showSpinner(
-  promise: any = undefined,
+  promise = undefined,
   isRouteLoader = false,
-  delay = 2400,
+
 ) {
   spinnerStore.set({ state: true, pageLoading: isRouteLoader ? true : false });
 

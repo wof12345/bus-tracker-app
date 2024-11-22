@@ -2,34 +2,21 @@
   {
     "name": "Home",
     "href": "/home",
-    "subNav": [
-      {
-        "name": "Overview",
-        "href": "/home/overview"
-      }
-    ],
     "icon": "home.svg"
   },
   {
     "name": "Hotspots",
     "href": "/hotspots",
-    "subNav": [
-      {
-        "name": "Overview",
-        "href": "/home/overview"
-      }
-    ],
     "icon": "hotspot.svg"
   },
   {
     "name": "Buses",
     "href": "/buses",
-    "subNav": [
-      {
-        "name": "Overview",
-        "href": "/home/overview"
-      }
-    ],
     "icon": "bus.svg"
+  },
+  {
+    "name": "Routes",
+    "href": "/routes",
+    "icon": "route.svg"
   }
 ]

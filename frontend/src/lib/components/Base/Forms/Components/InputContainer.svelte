@@ -16,7 +16,7 @@
 
 <div
   class={twMerge(
-    `input-container relative flex h-full w-full flex-1 flex-col items-start justify-center gap-1 text-gray-700`,
+    `input-container relative flex h-full w-full flex-1 flex-col items-start justify-center gap-1 text-gray-700 `,
     $$props.class,
   )}
 >

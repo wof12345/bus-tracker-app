@@ -119,7 +119,7 @@
           {/if}
           <input
             class={twMerge(
-              `w-full font-normal text-base overflow-hidden text-ellipsis bg-transparent outline-none ${textColor ? "placeholder:text-gray-400" : "placeholder:text-[#101828]"} hover:cursor-pointer ${disabled ? "cursor-not-allowed" : ""}`,
+              `w-full font-normal text-base overflow-hidden text-ellipsis bg-transparent outline-none ${textColor ? "placeholder:text-gray-400" : "placeholder:text-[#101828]"} ${disabled ? "cursor-not-allowed" : ""}`,
               $$props.inputClass,
             )}
             type={type === "string" ? "text" : type}

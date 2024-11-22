@@ -4,14 +4,15 @@
   import Logo from "./Logo.svelte";
   import {
     isAdmin,
-    isTeacher,
-    isStudent,
+    isCommuter,
+    isDriver,
     authStore,
     logout,
   } from "$lib/store/auth";
   import navAdmin from "$lib/data/admin_nav.json";
   import navTeacher from "$lib/data/teachers_nav.json";
   import navStudent from "$lib/data/students_nav.json";
+  import baseNav from "$lib/data/base_navigation.json";
   import Text from "../Base/Typography/Text.svelte";
 
   import Avatar from "../Base/Avatar.svelte";
@@ -38,11 +39,7 @@
 
   $: pathName = $page.route.id;
 
-  $: navItems = isAdmin($authStore)
-    ? navAdmin
-    : isTeacher($authStore)
-      ? navTeacher
-      : navStudent;
+  $: navItems = isAdmin($authStore) ? navAdmin : baseNav;
 
   // $: console.log(navItems, isAdmin($authStore));
 
@@ -171,7 +168,7 @@
                 }}
                 href={getHref(item)}
               >
-                {#if item?.name === "Services" && isStudent($authStore)}
+                {#if item?.name === "Services" && isCommuter($authStore)}
                   <div class="flex w-full items-center justify-between">
                     <div class="flex gap-3">
                       <img src={`/${item.icon}`} alt="" />

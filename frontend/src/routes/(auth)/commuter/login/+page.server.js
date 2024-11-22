@@ -30,7 +30,7 @@ export const actions = {
         body: {
           email,
           password,
-          role: "student",
+          role: "commuter",
         },
       });
 
@@ -41,7 +41,7 @@ export const actions = {
       if ("token" in data)
         userData = {
           username: email,
-          role: "student",
+          role: "commuter",
           token: data.token,
         };
 

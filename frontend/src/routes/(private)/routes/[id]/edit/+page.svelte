@@ -1,12 +1,17 @@
 <script>
   import { deserialize } from "$app/forms";
-  import { showSpinner } from "$lib/store/spinner";
+  import { showSpinner } from "$lib/store/spinner.js";
   import { onMount } from "svelte";
   import polyline from "@mapbox/polyline";
   import InputGroup from "$components/Base/Forms/Components/InputGroup.svelte";
   import SearchDropdown from "$components/Base/Forms/Inputs/SearchDropdown.svelte";
   import FormFieldLabel from "$components/Base/Forms/Components/FormFieldLabel.svelte";
-  import { IconArrowLeft, IconArrowRight, IconX } from "@tabler/icons-svelte";
+  import {
+    IconArrowLeft,
+    IconArrowRight,
+    IconTarget,
+    IconX,
+  } from "@tabler/icons-svelte";
   import IconButton from "$components/Base/Buttons/IconButton.svelte";
   import Button from "$components/Base/Buttons/Button.svelte";
   import { goto, invalidateAll } from "$app/navigation";
@@ -241,12 +246,20 @@
   <div id="map"></div>
 
   <div class="bg-white rounded-md flex flex-col p-4 gap-4">
-    <Button
-      class="w-max"
-      onClick={() => {
-        goto("/routes");
-      }}><IconArrowLeft size={18} /> Back</Button
-    >
+    <div class="flex justify-between gap-3">
+      <Button
+        class="w-max"
+        onClick={() => {
+          goto("/routes");
+        }}><IconArrowLeft size={18} /> Back</Button
+      >
+      <Button
+        class="w-max"
+        onClick={() => {
+          goto("/hotspots");
+        }}><IconTarget size={18} /> Create a new hotspot</Button
+      >
+    </div>
     <TableHeader title="Edit route" subtitle="Edit existing route " />
 
     <InputGroup flow="col">

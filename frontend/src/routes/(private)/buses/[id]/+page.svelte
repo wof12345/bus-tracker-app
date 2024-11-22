@@ -1,4 +1,7 @@
 <script>
+  import SearchDropdown from "$components/Base/Forms/Inputs/SearchDropdown.svelte";
+  import FormFieldLabel from "$components/Base/Forms/Components/FormFieldLabel.svelte";
+  import InputGroup from "$components/Base/Forms/Components/InputGroup.svelte";
   import Section from "$components/Base/Layout/Section.svelte";
   import Tab from "$components/Base/Tab/Tab.svelte";
   import TabBody from "$components/Base/Tab/TabBody.svelte";
@@ -14,95 +17,181 @@
   import TableFooter from "$components/Base/Table/TableFooter.svelte";
   import TableFrame from "$components/Base/Table/TableFrame.svelte";
   import Pagination from "$components/Base/Table/Components/Pagination.svelte";
-  import trialLesson from "$lib/data/transaction_data.json";
-  import Modal from "$components/Base/Modal/Modal.svelte";
-  import ModalHeader from "$components/Base/Modal/ModalHeader.svelte";
-  import ModalBody from "$components/Base/Modal/ModalBody.svelte";
-  import Paragraph from "$components/Base/Typography/Paragraph.svelte";
-  import Button from "$components/Base/Buttons/Button.svelte";
-  import ModalFooter from "$components/Base/Modal/ModalFooter.svelte";
-  import Input from "$components/Base/Forms/Inputs/Input.svelte";
-  import Text from "$components/Base/Typography/Text.svelte";
-  import DropDown from "$components/Base/Forms/Inputs/DropDown.svelte";
 
-  let payoutModal;
+  import Paragraph from "$components/Base/Typography/Paragraph.svelte";
+
+  import Text from "$components/Base/Typography/Text.svelte";
+  import Input from "$components/Base/Forms/Inputs/Input.svelte";
+  import TextArea from "$components/Base/Forms/Inputs/TextArea.svelte";
+  import Button from "$components/Base/Buttons/Button.svelte";
+  import { onMount } from "svelte";
+
+  export let data;
+
+  $: vehicle = data.vehicle;
+
+  $: routes = data.routes.data;
+
+  $: hotspots = data.hotspots.data;
+
+  let hotspotOptions;
+  let driverOptions;
+  let routeOptions;
+  let reservationOptions;
+  let helperOptions;
+
+  let editState = false;
+
+  let busForm = {
+    description: "Select one",
+    starting_point: "Select one",
+    route: "Select one",
+    reservation: "Select one",
+    driver: "Select one",
+    helper: "Select one",
+    name: "Select one",
+    license: "Select one",
+    time: "Select one",
+  };
+
+  function populateData(data) {
+    if (!data) return;
+
+    busForm.description = vehicle.description;
+    busForm.name = vehicle.name;
+    busForm.license = vehicle.license;
+
+    hotspotOptions = hotspots.map(
+      (elm) =>
+        new Object({
+          ...elm,
+          value: elm._id,
+          name: elm.name + ` - (${elm.location_name})`,
+        }),
+    );
+    routeOptions = routes.map((elm) => new Object({ ...elm, value: elm._id }));
+    reservationOptions = hotspots.map(
+      (elm) => new Object({ ...elm, value: elm._id }),
+    );
+    driverOptions = hotspots.map(
+      (elm) => new Object({ ...elm, value: elm._id }),
+    );
+    helperOptions = hotspots.map(
+      (elm) => new Object({ ...elm, value: elm._id }),
+    );
+  }
+
+  $: populateData(data);
+  onMount(() => {});
 </script>
 
 <Section class="flex flex-col gap-0">
   <div class="w-full">
-    <h1 class="font-semibold text-[#101828] text-3xl">John Doe</h1>
+    <h1 class="font-semibold text-[#101828] text-3xl">
+      {vehicle.name} <span class=" pl-2 text-xs">({vehicle._id})</span>
+    </h1>
     <p class="font-normal text-[#475467] text-base mt-1">
-      View the details of John Doe.
+      View the details of bus {vehicle.name}
     </p>
   </div>
 
   <Tab class="mt-6">
     <TabHeaders>
-      <TabHeader>Payout info</TabHeader>
-      <TabHeader>Payout history</TabHeader>
-      <TabHeader>Tutor’s details</TabHeader>
+      <TabHeader>Information</TabHeader>
+      <TabHeader>Extra</TabHeader>
     </TabHeaders>
 
     <TabBody>
       <TabPanel>
-        <div
-          class="w-full mx-auto flex flex-col items-center md:gap-4 gap-2 mt-6"
-        >
-          <div
-            class="md:flex md:gap-8 grid gap-1 md:border-b md:pb-4 w-full max-w-[520px]"
-          >
-            <Text class="text-[#344054] font-medium text-sm w-full"
-              >Bank Name</Text
-            >
-            <Paragraph class="text-[#475467] w-full"
-              >Commercial Bank of Dubai</Paragraph
-            >
-          </div>
+        <div class="w-full mx-auto grid grid-cols-2 lg:gap-x-28 gap-4 mt-6">
+          <InputGroup flow="col" class="col-span-1">
+            <FormFieldLabel>Name</FormFieldLabel>
+            <Input disabled={!editState} bind:value={busForm.name} />
+          </InputGroup>
 
-          <div
-            class="md:flex md:gap-8 grid gap-1 md:border-b md:pb-4 w-full max-w-[520px]"
-          >
-            <Text class="text-[#344054] font-medium text-sm w-full">Branch</Text
-            >
-            <Paragraph class="text-[#475467] w-full">Branch</Paragraph>
-          </div>
+          <InputGroup flow="col" class="col-span-1">
+            <FormFieldLabel>License</FormFieldLabel>
+            <Input disabled={!editState} bind:value={busForm.license} />
+          </InputGroup>
 
-          <div
-            class="md:flex md:gap-8 grid gap-1 md:border-b md:pb-4 w-full max-w-[520px]"
-          >
-            <Text class="text-[#344054] font-medium text-sm w-full"
-              >Account name</Text
+          <InputGroup flow="col" class="col-span-2">
+            <FormFieldLabel>Description</FormFieldLabel>
+            <TextArea disabled={!editState} bind:value={busForm.description} />
+          </InputGroup>
+
+          <InputGroup flow="col">
+            <FormFieldLabel>Starting point</FormFieldLabel>
+            <SearchDropdown
+              disabled={!editState}
+              bind:value={busForm.starting_point}
+              options={hotspotOptions}
+            />
+          </InputGroup>
+
+          <InputGroup flow="col">
+            <FormFieldLabel>Starting time</FormFieldLabel>
+            <SearchDropdown
+              disabled={!editState}
+              bind:value={busForm.helper}
+              options={helperOptions}
+            />
+          </InputGroup>
+
+          <InputGroup flow="col">
+            <FormFieldLabel>Route</FormFieldLabel>
+            <SearchDropdown
+              disabled={!editState}
+              bind:value={busForm.route}
+              options={routeOptions}
+            />
+          </InputGroup>
+
+          <InputGroup flow="col">
+            <FormFieldLabel>Reservation</FormFieldLabel>
+            <SearchDropdown
+              disabled={!editState}
+              bind:value={busForm.reservation}
+              options={reservationOptions}
+            />
+          </InputGroup>
+
+          <InputGroup flow="col">
+            <FormFieldLabel>Driver</FormFieldLabel>
+            <SearchDropdown
+              disabled={!editState}
+              bind:value={busForm.driver}
+              options={driverOptions}
+            />
+          </InputGroup>
+
+          <InputGroup flow="col">
+            <FormFieldLabel>Helper</FormFieldLabel>
+            <SearchDropdown
+              disabled={!editState}
+              bind:value={busForm.helper}
+              options={helperOptions}
+            />
+          </InputGroup>
+        </div>
+
+        <div class="flex gap-4 justify-end mt-5">
+          {#if !editState}
+            <Button
+              onClick={() => {
+                editState = true;
+              }}
+              class="w-max">Edit</Button
             >
-            <Paragraph class="text-[#475467] w-full"
-              >P.O.Box # 2466, Abu Dhabi, U.A.E</Paragraph
+          {:else}
+            <Button onClick={() => {}} class="w-max">Update</Button>
+
+            <Button
+              onClick={() => {
+                editState = false;
+              }}
+              class="w-max">Cancel</Button
             >
-          </div>
-          <div
-            class="md:flex md:gap-8 grid gap-1 md:border-b md:pb-4 w-full max-w-[520px]"
-          >
-            <Text class="text-[#344054] font-medium text-sm w-full"
-              >Account number</Text
-            >
-            <Paragraph class="text-[#475467] w-full">John Doe</Paragraph>
-          </div>
-          <div
-            class="md:flex md:gap-8 grid gap-1 md:border-b md:pb-4 w-full max-w-[520px]"
-          >
-            <Text class="text-[#344054] font-medium text-sm w-full"
-              >IBAN No</Text
-            >
-            <Paragraph class="text-[#475467] w-full">100 200 4000</Paragraph>
-          </div>
-          <div
-            class="md:flex md:gap-8 grid gap-1 md:border-b md:pb-4 w-full max-w-[520px]"
-          >
-            <Text class="text-[#344054] font-medium text-sm w-full"
-              >Swift code</Text
-            >
-            <Paragraph class="text-[#475467] w-full"
-              >AE2536542364353463434</Paragraph
-            >
-          </div>
+          {/if}
         </div>
       </TabPanel>
 
@@ -116,7 +205,7 @@
                 <TableBodyHeader class="col-span-1">Amount</TableBodyHeader>
               </TableHeaderRow>
 
-              {#each trialLesson as item}
+              {#each [] as item}
                 <TableRow class="items-center ">
                   <TableCell
                     class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
@@ -139,133 +228,6 @@
           </TableFooter>
         </Table>
       </TabPanel>
-
-      <TabPanel>
-        <div class="w-full mx-auto flex flex-col items-center gap-4 mt-6">
-          <div
-            class="md:flex md:gap-8 grid gap-1 md:border-b md:pb-4 w-full max-w-[520px]"
-          >
-            <Text
-              class="text-[#344054] font-medium text-sm w-full max-w-[120px]"
-              >Name</Text
-            >
-            <Paragraph class="text-[#475467] w-full">John Doe</Paragraph>
-          </div>
-
-          <div
-            class="md:flex md:gap-8 grid gap-1 md:border-b md:pb-4 w-full max-w-[520px]"
-          >
-            <Text
-              class="text-[#344054] font-medium text-sm w-full max-w-[120px]"
-              >Email</Text
-            >
-            <Paragraph class="text-[#475467] w-full"
-              >johndoe@example.com</Paragraph
-            >
-          </div>
-
-          <div
-            class="md:flex md:gap-8 grid gap-1 md:border-b md:pb-4 w-full max-w-[520px]"
-          >
-            <Text
-              class="text-[#344054] font-medium text-sm w-full max-w-[120px]"
-              >Phone</Text
-            >
-            <Paragraph class="text-[#475467] w-full">+971-50-1234567</Paragraph>
-          </div>
-
-          <div
-            class="md:flex md:gap-8 grid gap-1 md:border-b md:pb-4 w-full max-w-[520px]"
-          >
-            <Text
-              class="text-[#344054] font-medium text-sm w-full max-w-[120px]"
-              >Gender</Text
-            >
-            <Paragraph class="text-[#475467] w-full">Male</Paragraph>
-          </div>
-
-          <div
-            class="md:flex md:gap-8 grid gap-1 md:border-b md:pb-4 w-full max-w-[520px]"
-          >
-            <Text
-              class="text-[#344054] font-medium text-sm w-full max-w-[120px]"
-              >Birth date</Text
-            >
-            <Paragraph class="text-[#475467] w-full">12/12/1990</Paragraph>
-          </div>
-
-          <div
-            class="md:flex md:gap-8 grid gap-1 md:border-b md:pb-4 w-full max-w-[520px]"
-          >
-            <Text
-              class="text-[#344054] font-medium text-sm w-full max-w-[120px]"
-              >Location</Text
-            >
-            <Paragraph class="text-[#475467] w-full"
-              >Dubai Marina, Dubai, United Arab Emirates</Paragraph
-            >
-          </div>
-
-          <div class="md:flex md:gap-8 grid gap-1 md:pb-4 w-full max-w-[520px]">
-            <Text
-              class="text-[#344054] font-medium text-sm w-full max-w-[120px]"
-              >Photo</Text
-            >
-            <div class="w-[120px] h-[120px] bg-gray-200">
-              <img src="/tutors.svg" alt="" />
-            </div>
-          </div>
-        </div>
-      </TabPanel>
     </TabBody>
   </Tab>
-
-  <Modal bind:this={payoutModal} class="h-auto mx-6 max-h-[80vh] max-w-[400px]">
-    <ModalHeader class="border-b-0">
-      <img src="/flagIcon.svg" alt="" />
-      <div class="space-y-1">
-        <Paragraph class="font-semibold text-[18px] mt-4"
-          >Add a payout record</Paragraph
-        >
-
-        <Paragraph class="text-[#475467] text-sm">
-          Insert amount and select tutor to create a new payout record.
-        </Paragraph>
-      </div>
-    </ModalHeader>
-
-    <ModalBody class="space-y-5">
-      <div class=" w-full space-y-2">
-        <Text class="text-left text-sm font-medium text-[#344054]">Amount</Text>
-        <Input
-          inputClass="placeholder:text-[#667085] placeholder:font-normal placeholder:text-base"
-          class="w-full max-w-[360px]"
-          label="Enter amount"
-          name="last_name"
-        />
-      </div>
-      <div class=" w-full space-y-2">
-        <Text class="text-left text-sm font-medium text-[#344054]">Amount</Text>
-        <DropDown
-          class="text-base font-normal text-[#667085]"
-          label="Select tutor"
-        >
-          <img src="/tutor.svg" alt="" />
-        </DropDown>
-      </div>
-    </ModalBody>
-
-    <ModalFooter class="border-t-0">
-      <div
-        class="md:flex flex-nowrap gap-2 space-y-3 md:space-y-0 justify-center mt-[-15px] md:mt-0 w-full relative pb-[55px] md:pb-0"
-      >
-        <Button
-          onClick={() => payoutModal.hide()}
-          class="w-full md:static absolute bottom-0 "
-          variant={"secondary"}>Cancel</Button
-        >
-        <Button class="w-full  ">Done</Button>
-      </div>
-    </ModalFooter>
-  </Modal>
 </Section>

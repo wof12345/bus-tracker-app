@@ -32,41 +32,49 @@
 
   export let data;
 
-  $: buses = data?.vehicles;
+  $: users = data?.users;
 
-  let busCreateForm = {
-    name: undefined,
-    description: undefined,
-    driver: undefined,
-    license: undefined,
+  let userCreateForm = {
+    email: undefined,
+    first_name: undefined,
+    last_name: undefined,
+    address: undefined,
+    phone: undefined,
   };
 
-  let selectedBus;
-  let selectedBusRef;
+  let selectedUser;
+  let selectedUserRef;
 
   let createModal;
   let editModal;
 
   function selectItem(item) {
-    selectedBus = item;
-    selectedBusRef = JSON.parse(JSON.stringify(item));
+    selectedUser = item;
+    selectedUserRef = JSON.parse(JSON.stringify(item));
   }
 
   async function create() {
     let form = new FormData();
 
-    if (!validateInput(busCreateForm, ["driver"])) {
-      busCreateForm = busCreateForm;
+    if (
+      !validateInput(userCreateForm, [
+        "phone",
+        "address",
+        "first_name",
+        "last_name",
+      ])
+    ) {
+      userCreateForm = userCreateForm;
 
       showToaster("Empty required fields");
       return;
     }
 
-    form.append("name", busCreateForm.name);
-    form.append("description", busCreateForm.description);
-    form.append("license", busCreateForm.license);
-    form.append("driver", busCreateForm.driver);
-    form.append("coordinates", JSON.stringify([]));
+    form.append("phone", userCreateForm.phone);
+    form.append("email", userCreateForm.email);
+    form.append("first_name", userCreateForm.first_name);
+    form.append("last_name", userCreateForm.last_name);
+    form.append("address", userCreateForm.address);
 
     const response = await fetch(`?/create`, {
       method: "POST",
@@ -75,33 +83,41 @@
 
     const data = deserialize(await response.text());
 
+    console.log(data);
+
     if (!validateApiResponse(data)) {
       return;
     }
 
     createModal.hide();
-    showToaster("Bus added");
+    showToaster("User added");
     await invalidateAll();
   }
 
   async function edit() {
     let form = new FormData();
 
-    if (!validateInput(selectedBusRef, ["driver", "current_coordinates"])) {
-      selectedBusRef = selectedBusRef;
+    if (
+      !validateInput(selectedUserRef, [
+        "phone",
+        "address",
+        "first_name",
+        "last_name",
+        "is_verified",
+      ])
+    ) {
+      selectedUserRef = selectedUserRef;
+      console.log(selectedUserRef);
       showToaster("Empty required fields");
       return;
     }
 
-    form.append("_id", selectedBusRef._id);
-    form.append("name", selectedBusRef.name);
-    form.append("description", selectedBusRef.description);
-    form.append("license", selectedBusRef.license);
-    form.append("driver", selectedBusRef.driver);
-    form.append(
-      "coordinates",
-      JSON.stringify(selectedBusRef.current_coordinates),
-    );
+    form.append("_id", selectedUserRef._id);
+    form.append("phone", selectedUserRef.phone);
+    form.append("email", selectedUserRef.email);
+    form.append("first_name", selectedUserRef.first_name);
+    form.append("last_name", selectedUserRef.last_name);
+    form.append("address", selectedUserRef.address);
 
     const response = await fetch(`?/update`, {
       method: "POST",
@@ -110,23 +126,25 @@
 
     const data = deserialize(await response.text());
 
+    console.log(data);
+
     if (!validateApiResponse(data)) {
       return;
     }
 
     editModal.hide();
-    showToaster("Bus updated");
+    showToaster("User updated");
     await invalidateAll();
   }
 </script>
 
 <Section class="flex flex-col gap-0 h-full">
-  <TableHeader class="mb-3" title="Buses" subtitle="Manage registered buses">
+  <TableHeader class="mb-3" title="Drivers" subtitle="Manage drivers">
     <div slot="below-head">
       <Button
         onClick={() => {
           createModal.show();
-        }}>+ Add new bus</Button
+        }}>+ Add new driver</Button
       >
     </div>
   </TableHeader>
@@ -136,45 +154,32 @@
       <TableBody>
         <TableHeaderRow>
           <TableBodyHeader class="col-span-1">Name</TableBodyHeader>
-          <TableBodyHeader class="col-span-1">License</TableBodyHeader>
-          <TableBodyHeader class="col-span-1">Driver</TableBodyHeader>
-          <TableBodyHeader class="col-span-1">Status</TableBodyHeader>
+          <TableBodyHeader class="col-span-1">Phone</TableBodyHeader>
+          <TableBodyHeader class="col-span-1">Email</TableBodyHeader>
           <TableBodyHeader class="col-span-1"></TableBodyHeader>
         </TableHeaderRow>
 
-        {#each buses?.data || [] as item}
+        {#each users?.data || [] as item}
           <TableRow
-            onClick={() => {
-              goto(`/buses/${item._id}`);
-            }}
+            onClick={() => {}}
             class="items-center hover:cursor-pointer hover:bg-gray-100"
           >
             <TableCell
               class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-              >{item.name}</TableCell
+              >{(item.first_name ?? " ") + (item.last_name ?? " ")}</TableCell
             >
             <TableCell
               class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-              >{item.license}</TableCell
+              >{item.phone}</TableCell
             >
             <TableCell
               class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-              >{item.driver}</TableCell
-            >
-            <TableCell
-              class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-              >{item.status ?? "Stopped"}</TableCell
+              >{item.email}</TableCell
             >
 
             <TableCell
               class="col-span-1 flex justify-end gap-3 font-normal text-sm text-[#475467]"
             >
-              <TableButton
-                onClick={(e) => {
-                  goto("/live");
-                  e.stopPropagation();
-                }}><IconLiveView /></TableButton
-              >
               <TableButton
                 onClick={(e) => {
                   selectItem(item);
@@ -201,7 +206,7 @@
                     return;
                   }
 
-                  showToaster("Bus deleted");
+                  showToaster("User deleted");
                   await invalidateAll();
                 }}><IconTrash /></TableButton
               ></TableCell
@@ -211,39 +216,45 @@
       </TableBody>
     </TableFrame>
     <TableFooter>
-      <Pagination totalItems={buses?.total || 0} onPageChange={() => {}} />
+      <Pagination totalItems={users?.total || 0} onPageChange={() => {}} />
     </TableFooter>
   </Table>
 </Section>
 
 <Modal bind:this={createModal}>
   <ModalHeader>
-    <Title class="text-lg md:text-lg">Add bus</Title>
-    <Paragraph>Add a new bus to the system</Paragraph>
+    <Title class="text-lg md:text-lg">Add driver</Title>
+    <Paragraph>Add a new driver to the system</Paragraph>
   </ModalHeader>
 
   <ModalBody class="gap-2">
+    <div class="flex gap-2">
+      <InputGroup flow="col">
+        <FormFieldLabel>First name</FormFieldLabel>
+        <Input bind:value={userCreateForm.first_name} placeholder="John" />
+      </InputGroup>
+
+      <InputGroup flow="col">
+        <FormFieldLabel>Last name</FormFieldLabel>
+        <Input bind:value={userCreateForm.last_name} placeholder="Doe" />
+      </InputGroup>
+    </div>
     <InputGroup flow="col">
-      <FormFieldLabel>Name*</FormFieldLabel>
-      <Input bind:value={busCreateForm.name} placeholder="Bus name" />
+      <FormFieldLabel>Email*</FormFieldLabel>
+      <Input bind:value={userCreateForm.email} placeholder="joe@email.com" />
     </InputGroup>
 
     <InputGroup flow="col">
-      <FormFieldLabel>Description*</FormFieldLabel>
+      <FormFieldLabel>Phone</FormFieldLabel>
+      <Input bind:value={userCreateForm.phone} placeholder="+0872516211" />
+    </InputGroup>
+
+    <InputGroup flow="col">
+      <FormFieldLabel>Address</FormFieldLabel>
       <Input
-        bind:value={busCreateForm.description}
-        placeholder="Bus description"
+        bind:value={userCreateForm.address}
+        placeholder="2/A House, 36no Road"
       />
-    </InputGroup>
-
-    <InputGroup flow="col">
-      <FormFieldLabel>License*</FormFieldLabel>
-      <Input bind:value={busCreateForm.license} placeholder="Plate text" />
-    </InputGroup>
-
-    <InputGroup flow="col">
-      <FormFieldLabel>Driver</FormFieldLabel>
-      <Input bind:value={busCreateForm.driver} placeholder="Driver name" />
     </InputGroup>
   </ModalBody>
 
@@ -264,32 +275,38 @@
 
 <Modal bind:this={editModal}>
   <ModalHeader>
-    <Title class="text-lg md:text-lg">Edit bus</Title>
-    <Paragraph>Edit a bus from the system</Paragraph>
+    <Title class="text-lg md:text-lg">Edit driver</Title>
+    <Paragraph>Edit a driver from the system</Paragraph>
   </ModalHeader>
 
   <ModalBody class="gap-2">
+    <div class="flex gap-2">
+      <InputGroup flow="col">
+        <FormFieldLabel>First name</FormFieldLabel>
+        <Input bind:value={selectedUserRef.first_name} placeholder="John" />
+      </InputGroup>
+
+      <InputGroup flow="col">
+        <FormFieldLabel>Last name</FormFieldLabel>
+        <Input bind:value={selectedUserRef.last_name} placeholder="Doe" />
+      </InputGroup>
+    </div>
     <InputGroup flow="col">
-      <FormFieldLabel>Name*</FormFieldLabel>
-      <Input bind:value={selectedBusRef.name} placeholder="Bus name" />
+      <FormFieldLabel>Email*</FormFieldLabel>
+      <Input bind:value={selectedUserRef.email} placeholder="joe@email.com" />
     </InputGroup>
 
     <InputGroup flow="col">
-      <FormFieldLabel>Description*</FormFieldLabel>
+      <FormFieldLabel>Phone</FormFieldLabel>
+      <Input bind:value={selectedUserRef.phone} placeholder="+0872516211" />
+    </InputGroup>
+
+    <InputGroup flow="col">
+      <FormFieldLabel>Address</FormFieldLabel>
       <Input
-        bind:value={selectedBusRef.description}
-        placeholder="Bus description"
+        bind:value={selectedUserRef.address}
+        placeholder="2/A House, 36no Road"
       />
-    </InputGroup>
-
-    <InputGroup flow="col">
-      <FormFieldLabel>License*</FormFieldLabel>
-      <Input bind:value={selectedBusRef.license} placeholder="Plate text" />
-    </InputGroup>
-
-    <InputGroup flow="col">
-      <FormFieldLabel>Driver</FormFieldLabel>
-      <Input bind:value={selectedBusRef.driver} placeholder="Driver name" />
     </InputGroup>
   </ModalBody>
 

@@ -1,13 +1,9 @@
 <script>
-  import Banner from "$components/Banner/Banner.svelte";
   import Nav from "$lib/components/Nav/Nav.svelte";
-  import { authStore, isTeacher } from "$lib/store/auth";
+  import { authStore, isCommuter } from "$lib/store/auth.js";
   import { onMount } from "svelte";
-  import { validateApiResponse } from "$components/utils/validateApiResponse.js";
-  import { deserialize } from "$app/forms";
+
   import { page } from "$app/stores";
-  import { goto } from "$app/navigation";
-  import { handleUserAndTutorStoreInfo } from "$components/utils/userInfoPopulation.js";
 
   export let data;
 

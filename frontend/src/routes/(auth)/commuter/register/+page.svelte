@@ -35,7 +35,7 @@
   >
     <Logo alt={false} />
     <div class="grid gap-3 text-center">
-      <Title class="text-2xl">Create a student account</Title>
+      <Title class="text-2xl">Create a account</Title>
       <Text class=" text-base font-normal text-[#475467]"
         >Create an account to get started.</Text
       >

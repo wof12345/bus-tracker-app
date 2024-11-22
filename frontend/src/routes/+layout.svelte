@@ -4,8 +4,8 @@
   import "../app.pcss";
   import { navigating, page } from "$app/stores";
   import { browser } from "$app/environment";
-  import { showSpinner } from "$lib/store/spinner";
-  import { authStore } from "$lib/store/auth";
+  import { showSpinner } from "$lib/store/spinner.js";
+  import { authStore } from "$lib/store/auth.js";
 
   let id = $page.params.id;
 

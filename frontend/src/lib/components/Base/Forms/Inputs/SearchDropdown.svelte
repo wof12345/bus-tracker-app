@@ -8,6 +8,7 @@
   export let placeholder = "";
   export let areaDropDown;
   export let showIconX;
+  export let disabled = false;
 
   let originalPlaceholder = placeholder;
   let lastValue;
@@ -53,7 +54,7 @@
     onInput={filter}
     options={filteredOptions || $$props.options}
     editable={true}
-    disabled={$$props.disabled}
+    {disabled}
     extractValue={true}
     bind:open={menuOpen}
     {placeholder}
@@ -72,7 +73,7 @@
     onInput={filter}
     options={filteredOptions || $$props.options}
     editable={true}
-    disabled={$$props.disabled}
+    {disabled}
     extractValue={true}
     bind:placeholder
     bind:open={menuOpen}

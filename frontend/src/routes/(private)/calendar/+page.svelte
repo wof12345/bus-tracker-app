@@ -26,7 +26,7 @@
 
   import DropDown from "$components/Base/Forms/Inputs/DropDown.svelte";
 
-  import { authStore, isStudent, isTeacher } from "$lib/store/auth.ts";
+  import { authStore, isDriver, isCommuter } from "$lib/store/auth.js";
 
   import { showToaster } from "$lib/store/toaster.ts";
 
@@ -556,7 +556,7 @@
             />
           </InputGroup>
         </div>
-        {#if isTeacher($authStore)}
+        {#if isCommuter($authStore)}
           <a href="/tutors/update-availability">
             <Button class="min-w-[245px]">
               <img src="/watch.svg" alt="" />

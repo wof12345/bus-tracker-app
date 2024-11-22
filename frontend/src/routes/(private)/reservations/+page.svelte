@@ -32,40 +32,38 @@
 
   export let data;
 
-  $: buses = data?.vehicles;
+  $: reservations = data?.reservations;
 
-  let busCreateForm = {
+  let reservationCreateForm = {
     name: undefined,
     description: undefined,
-    driver: undefined,
-    license: undefined,
   };
 
-  let selectedBus;
-  let selectedBusRef;
+  let selectedReservation;
+  let selectedReservationRef;
 
   let createModal;
   let editModal;
 
   function selectItem(item) {
-    selectedBus = item;
-    selectedBusRef = JSON.parse(JSON.stringify(item));
+    selectedReservation = item;
+    selectedReservationRef = JSON.parse(JSON.stringify(item));
   }
 
   async function create() {
     let form = new FormData();
 
-    if (!validateInput(busCreateForm, ["driver"])) {
-      busCreateForm = busCreateForm;
+    if (!validateInput(reservationCreateForm, ["driver"])) {
+      reservationCreateForm = reservationCreateForm;
 
       showToaster("Empty required fields");
       return;
     }
 
-    form.append("name", busCreateForm.name);
-    form.append("description", busCreateForm.description);
-    form.append("license", busCreateForm.license);
-    form.append("driver", busCreateForm.driver);
+    form.append("name", reservationCreateForm.name);
+    form.append("description", reservationCreateForm.description);
+    form.append("license", reservationCreateForm.license);
+    form.append("driver", reservationCreateForm.driver);
     form.append("coordinates", JSON.stringify([]));
 
     const response = await fetch(`?/create`, {
@@ -80,27 +78,29 @@
     }
 
     createModal.hide();
-    showToaster("Bus added");
+    showToaster("Reservation added");
     await invalidateAll();
   }
 
   async function edit() {
     let form = new FormData();
 
-    if (!validateInput(selectedBusRef, ["driver", "current_coordinates"])) {
-      selectedBusRef = selectedBusRef;
+    if (
+      !validateInput(selectedReservationRef, ["driver", "current_coordinates"])
+    ) {
+      selectedReservationRef = selectedReservationRef;
       showToaster("Empty required fields");
       return;
     }
 
-    form.append("_id", selectedBusRef._id);
-    form.append("name", selectedBusRef.name);
-    form.append("description", selectedBusRef.description);
-    form.append("license", selectedBusRef.license);
-    form.append("driver", selectedBusRef.driver);
+    form.append("_id", selectedReservationRef._id);
+    form.append("name", selectedReservationRef.name);
+    form.append("description", selectedReservationRef.description);
+    form.append("license", selectedReservationRef.license);
+    form.append("driver", selectedReservationRef.driver);
     form.append(
       "coordinates",
-      JSON.stringify(selectedBusRef.current_coordinates),
+      JSON.stringify(selectedReservationRef.current_coordinates),
     );
 
     const response = await fetch(`?/update`, {
@@ -115,18 +115,22 @@
     }
 
     editModal.hide();
-    showToaster("Bus updated");
+    showToaster("Reservation updated");
     await invalidateAll();
   }
 </script>
 
 <Section class="flex flex-col gap-0 h-full">
-  <TableHeader class="mb-3" title="Buses" subtitle="Manage registered buses">
+  <TableHeader
+    class="mb-3"
+    title="Reservationes"
+    subtitle="Manage reservations"
+  >
     <div slot="below-head">
       <Button
         onClick={() => {
           createModal.show();
-        }}>+ Add new bus</Button
+        }}>+ Add new reservation</Button
       >
     </div>
   </TableHeader>
@@ -136,13 +140,11 @@
       <TableBody>
         <TableHeaderRow>
           <TableBodyHeader class="col-span-1">Name</TableBodyHeader>
-          <TableBodyHeader class="col-span-1">License</TableBodyHeader>
-          <TableBodyHeader class="col-span-1">Driver</TableBodyHeader>
-          <TableBodyHeader class="col-span-1">Status</TableBodyHeader>
+          <TableBodyHeader class="col-span-1">Description</TableBodyHeader>
           <TableBodyHeader class="col-span-1"></TableBodyHeader>
         </TableHeaderRow>
 
-        {#each buses?.data || [] as item}
+        {#each reservations?.data || [] as item}
           <TableRow
             onClick={() => {
               goto(`/buses/${item._id}`);
@@ -155,26 +157,12 @@
             >
             <TableCell
               class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-              >{item.license}</TableCell
-            >
-            <TableCell
-              class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-              >{item.driver}</TableCell
-            >
-            <TableCell
-              class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-              >{item.status ?? "Stopped"}</TableCell
+              >{item.description}</TableCell
             >
 
             <TableCell
               class="col-span-1 flex justify-end gap-3 font-normal text-sm text-[#475467]"
             >
-              <TableButton
-                onClick={(e) => {
-                  goto("/live");
-                  e.stopPropagation();
-                }}><IconLiveView /></TableButton
-              >
               <TableButton
                 onClick={(e) => {
                   selectItem(item);
@@ -201,7 +189,7 @@
                     return;
                   }
 
-                  showToaster("Bus deleted");
+                  showToaster("Reservatiom deleted");
                   await invalidateAll();
                 }}><IconTrash /></TableButton
               ></TableCell
@@ -211,39 +199,35 @@
       </TableBody>
     </TableFrame>
     <TableFooter>
-      <Pagination totalItems={buses?.total || 0} onPageChange={() => {}} />
+      <Pagination
+        totalItems={reservations?.total || 0}
+        onPageChange={() => {}}
+      />
     </TableFooter>
   </Table>
 </Section>
 
 <Modal bind:this={createModal}>
   <ModalHeader>
-    <Title class="text-lg md:text-lg">Add bus</Title>
-    <Paragraph>Add a new bus to the system</Paragraph>
+    <Title class="text-lg md:text-lg">Add reservation</Title>
+    <Paragraph>Add a new reservation to the system</Paragraph>
   </ModalHeader>
 
   <ModalBody class="gap-2">
     <InputGroup flow="col">
       <FormFieldLabel>Name*</FormFieldLabel>
-      <Input bind:value={busCreateForm.name} placeholder="Bus name" />
+      <Input
+        bind:value={reservationCreateForm.name}
+        placeholder="Reservation name"
+      />
     </InputGroup>
 
     <InputGroup flow="col">
       <FormFieldLabel>Description*</FormFieldLabel>
       <Input
-        bind:value={busCreateForm.description}
-        placeholder="Bus description"
+        bind:value={reservationCreateForm.description}
+        placeholder="Reservation description"
       />
-    </InputGroup>
-
-    <InputGroup flow="col">
-      <FormFieldLabel>License*</FormFieldLabel>
-      <Input bind:value={busCreateForm.license} placeholder="Plate text" />
-    </InputGroup>
-
-    <InputGroup flow="col">
-      <FormFieldLabel>Driver</FormFieldLabel>
-      <Input bind:value={busCreateForm.driver} placeholder="Driver name" />
     </InputGroup>
   </ModalBody>
 
@@ -264,32 +248,25 @@
 
 <Modal bind:this={editModal}>
   <ModalHeader>
-    <Title class="text-lg md:text-lg">Edit bus</Title>
-    <Paragraph>Edit a bus from the system</Paragraph>
+    <Title class="text-lg md:text-lg">Editreservation</Title>
+    <Paragraph>Edit areservation from the system</Paragraph>
   </ModalHeader>
 
   <ModalBody class="gap-2">
     <InputGroup flow="col">
       <FormFieldLabel>Name*</FormFieldLabel>
-      <Input bind:value={selectedBusRef.name} placeholder="Bus name" />
+      <Input
+        bind:value={selectedReservationRef.name}
+        placeholder="Reservation name"
+      />
     </InputGroup>
 
     <InputGroup flow="col">
       <FormFieldLabel>Description*</FormFieldLabel>
       <Input
-        bind:value={selectedBusRef.description}
-        placeholder="Bus description"
+        bind:value={selectedReservationRef.description}
+        placeholder="Reservation description"
       />
-    </InputGroup>
-
-    <InputGroup flow="col">
-      <FormFieldLabel>License*</FormFieldLabel>
-      <Input bind:value={selectedBusRef.license} placeholder="Plate text" />
-    </InputGroup>
-
-    <InputGroup flow="col">
-      <FormFieldLabel>Driver</FormFieldLabel>
-      <Input bind:value={selectedBusRef.driver} placeholder="Driver name" />
     </InputGroup>
   </ModalBody>
 

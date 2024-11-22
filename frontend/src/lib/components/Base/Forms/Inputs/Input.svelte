@@ -30,7 +30,7 @@
   }
 
   function formatValue(value) {
-    if (typeof value === "object") return value.value;
+    if (typeof value === "object") return value?.value;
 
     return value;
   }

@@ -1,6 +1,6 @@
 <script>
   import GroupedInput from "$lib/components/Base/Forms/Components/GroupedInput.svelte";
-  import { authStore } from "$lib/store/auth";
+  import { authStore } from "$lib/store/auth.js";
   import UserInfo from "$lib/layouts/AdditionalInformation/UserInfo.svelte";
   import StepIconBase from "$components/Assets/StepIconBase.svelte";
   import StepIconCompleted from "$components/Assets/StepIconCompleted.svelte";
@@ -27,7 +27,7 @@
   import { showToaster } from "$lib/store/toaster";
   import FileUpload from "$components/Base/Forms/Inputs/FileUpload.svelte";
   import Paragraph from "$components/Base/Typography/Paragraph.svelte";
-  import { showSpinner } from "$lib/store/spinner.ts";
+  import { showSpinner } from "$lib/store/spinner.js";
   import { validateApiResponse } from "$components/utils/validateApiResponse.js";
   import { onMount } from "svelte";
   import { handleUserAndTutorStoreInfo } from "$components/utils/userInfoPopulation.js";

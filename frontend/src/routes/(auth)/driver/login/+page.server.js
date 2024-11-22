@@ -1,5 +1,4 @@
-import { fail, redirect } from "@sveltejs/kit";
-import { showSpinner } from "$lib/store/spinner";
+import { redirect } from "@sveltejs/kit";
 import api from "$lib/api/api";
 import { validateApiResponse } from "$components/utils/validateApiResponse.js";
 
@@ -16,7 +15,7 @@ export const load = async (event) => {
 
 export const actions = {
   login: async (event) => {
-    const { request, cookies, locals, fetch } = event;
+    const { request, cookies, fetch } = event;
 
     const formData = await request.formData();
 
@@ -31,7 +30,7 @@ export const actions = {
         body: {
           email,
           password,
-          role: "tutor",
+          role: "driver",
         },
       });
 

@@ -32,7 +32,7 @@
     if ($$props.clickAction) $$props.clickAction();
   }}
   class={twMerge(
-    `${classId} input-frame flex h-full w-full flex-1 items-center gap-1 rounded-lg border border-gray-300 bg-white px-2.5  py-1.5 text-md font-medium shadow-xs  outline-none ${disabled ? "bg-gray-100" : ""} ${fileHover ? "hover:ring-[#BA24D5] hover:ring-2" : "focus-within:ring-4 focus-within:ring-[#9E77ED3D] focus-within:border-[#EEAAFD]"}  ${
+    `${classId} input-frame flex h-full w-full flex-1 items-center gap-1 rounded-lg border border-gray-300 bg-white px-2.5  py-2.5 text-md font-medium shadow-xs  outline-none ${disabled ? "bg-gray-100 hover:cursor-not-allowed" : ""} ${fileHover ? "hover:ring-[#BA24D5] hover:ring-2" : "focus-within:ring-4 focus-within:ring-[#9E77ED3D] focus-within:border-[#EEAAFD]"}  ${
       error ? "border border-[#FDA29B] focus-within:ring-red-100" : ""
     }`,
     $$props.class,

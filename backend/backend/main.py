@@ -10,9 +10,11 @@ from backend.routers import (
     license_detection,
     vehicles,
     hotspots,
+    users,
     auth,
     routes,
     websocket,
+    reservations,
 )
 from fastapi import HTTPException, Depends
 from backend.utils.auth_scheme import auth_scheme
@@ -64,6 +66,13 @@ async def mongo_transaction_exception_handler(request: Request, exc: PyMongoErro
 app.include_router(auth.router, tags=['auth'], prefix='/auth')
 
 app.include_router(
+    users.router,
+    tags=['users'],
+    prefix='/users',
+    dependencies=[Depends(auth_scheme)],
+)
+
+app.include_router(
     license_detection.router,
     tags=['license-detection'],
     prefix='/license-detection',
@@ -91,6 +100,14 @@ app.include_router(
     prefix='/hotspots',
     dependencies=[Depends(role_required([RoleEnum.ADMIN]))],
 )
+
+app.include_router(
+    reservations.router,
+    tags=['reservations'],
+    prefix='/reservations',
+    dependencies=[Depends(role_required([RoleEnum.ADMIN]))],
+)
+
 
 app.include_router(
     websocket.router,

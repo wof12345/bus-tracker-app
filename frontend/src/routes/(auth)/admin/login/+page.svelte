@@ -8,7 +8,7 @@
   import { goto } from "$app/navigation";
   import { showToaster } from "$lib/store/toaster.ts";
   import Paragraph from "$components/Base/Typography/Paragraph.svelte";
-  import { authStore } from "$lib/store/auth.ts";
+  import { authStore } from "$lib/store/auth.js";
   import { setCache } from "$components/utils/localstorage.js";
   import { browser } from "$app/environment";
   import Logo from "$components/Nav/Logo.svelte";

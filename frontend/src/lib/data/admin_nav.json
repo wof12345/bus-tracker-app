@@ -18,5 +18,25 @@
     "name": "Routes",
     "href": "/routes",
     "icon": "route.svg"
+  },
+  {
+    "name": "Reservations",
+    "href": "/reservations",
+    "icon": "reservation.svg"
+  },
+  {
+    "name": "Drivers",
+    "href": "/drivers",
+    "icon": "driver.svg"
+  },
+  {
+    "name": "Helpers",
+    "href": "/helpers",
+    "icon": "helper.svg"
+  },
+  {
+    "name": "Commuters",
+    "href": "/commuters",
+    "icon": "commuter.svg"
   }
 ]
