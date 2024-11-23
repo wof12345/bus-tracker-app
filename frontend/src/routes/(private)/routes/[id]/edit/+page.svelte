@@ -37,6 +37,7 @@
   let selectedHotspot;
 
   let mapData = [];
+  let mapLines = [];
 
   let totalLine = [];
 
@@ -161,6 +162,11 @@
       addMarker(elm.coordinates);
       map.setView(elm.coordinates);
 
+      mapLines.forEach((layer) => {
+        map.removeLayer(layer);
+      });
+      mapLines = [];
+
       if (idx > 0 && callDraw)
         getAndSetPath(array[idx - 1].coordinates, elm.coordinates, it);
     });
@@ -192,22 +198,25 @@
     }
   }
 
-  async function getAndSetPath(start, end, it) {
+  async function getAndSetPath(start, end) {
     try {
-      totalLine = [];
       const route = await getORSRoute(start, end);
 
+      mapLines.forEach((layer) => {
+        map.removeLayer(layer);
+      });
+      mapLines = [];
+
       totalLine.push(...route);
+      // totalLine.pop();
 
       let line = L.polyline(totalLine, {
         color: "blue",
         weight: 4,
       }).addTo(map);
 
-      mapData.push(line);
-      it++;
-
-      console.log(it, start, end, selectedHotspots);
+      mapLines.push(line);
+      mapLines = mapLines;
     } catch (error) {
       console.error("Error fetching directions:", error);
     }
@@ -322,7 +331,9 @@
     <div id="map" class="relative z-0"></div>
   </div>
 
-  <div class="bg-white rounded-md flex flex-col p-4 gap-4">
+  <div
+    class="bg-white rounded-md flex flex-col p-4 gap-4 h-screen overflow-auto"
+  >
     <div class="flex justify-between gap-3">
       <Button
         class="w-max"

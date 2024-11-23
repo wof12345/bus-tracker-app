@@ -36,6 +36,7 @@
   let selectedHotspot;
 
   let mapData = [];
+  let mapLines = [];
 
   let totalLine = [];
 
@@ -125,8 +126,12 @@
     mapData.push(marker);
   }
 
+  $: console.log(mapLines, totalLine);
   async function drawOnMap(array) {
     totalLine = [];
+
+    console.log("called");
+
     mapData.forEach((layer) => {
       map.removeLayer(layer);
     });
@@ -136,7 +141,14 @@
       addMarker(elm.coordinates);
       map.setView(elm.coordinates);
 
-      if (idx > 0) getAndSetPath(array[idx - 1].coordinates, elm.coordinates);
+      mapLines.forEach((layer) => {
+        map.removeLayer(layer);
+      });
+      mapLines = [];
+
+      if (idx > 0) {
+        getAndSetPath(array[idx - 1].coordinates, elm.coordinates);
+      }
     });
   }
 
@@ -157,8 +169,6 @@
 
     const data = deserialize(await response.text());
 
-    console.log(data);
-
     if (data.data.routes && data.data.routes[0]) {
       let geometry = data.data.routes[0].geometry;
 
@@ -174,14 +184,23 @@
     try {
       const route = await getORSRoute(start, end);
 
+      mapLines.forEach((layer) => {
+        map.removeLayer(layer);
+      });
+      mapLines = [];
+
       totalLine.push(...route);
+      totalLine = totalLine;
+      // totalLine.pop();
+      console.log(totalLine.length, route.length);
 
       let line = L.polyline(totalLine, {
         color: "blue",
         weight: 4,
       }).addTo(map);
 
-      mapData.push(line);
+      mapLines.push(line);
+      mapLines = mapLines;
     } catch (error) {
       console.error("Error fetching directions:", error);
     }
@@ -294,7 +313,9 @@
     <div id="map" class="relative z-0"></div>
   </div>
 
-  <div class="bg-white rounded-md flex flex-col p-4 gap-4">
+  <div
+    class="bg-white rounded-md flex flex-col p-4 gap-4 h-screen overflow-auto"
+  >
     <div class="flex justify-between gap-3">
       <Button
         class="w-max"
@@ -324,8 +345,11 @@
       class="h-max bg-gray-50 min-w-[400px] max-w-[500px] flex flex-wrap gap-2 items-center"
     >
       {#each selectedHotspots as hotspot, idx}
-        <div
-          class="border border-gray-400 rounded-lg p-2 h-[80px] max-w-[150px] overflow-hidden flex justify-between gap-2"
+        <button
+          on:click={() => {
+            map.setView(hotspot.coordinates);
+          }}
+          class="border border-gray-400 rounded-lg p-2 h-max max-w-[150px] overflow-hidden flex justify-between gap-2"
         >
           <p class="text-ellipsis w-[100px] overflow-hidden text-xs">
             {hotspot.name}
@@ -353,7 +377,7 @@
           >
             <IconX size={16} />
           </IconButton>
-        </div>
+        </button>
 
         {#if selectedHotspots[idx + 1]}
           <IconArrowRight size={16} />
