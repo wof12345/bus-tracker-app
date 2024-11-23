@@ -29,6 +29,7 @@
   import TableFooter from "$components/Base/Table/TableFooter.svelte";
   import TableFrame from "$components/Base/Table/TableFrame.svelte";
   import Pagination from "$components/Base/Table/Components/Pagination.svelte";
+  import { authStore, isAdmin, isCommuter, isManager } from "$lib/store/auth";
 
   export let data;
 
@@ -132,11 +133,13 @@
 <Section class="flex flex-col gap-0 h-full">
   <TableHeader class="mb-3" title="Buses" subtitle="Manage registered buses">
     <div slot="below-head">
-      <Button
-        onClick={() => {
-          createModal.show();
-        }}>+ Add new bus</Button
-      >
+      {#if isAdmin($authStore) || isManager($authStore)}
+        <Button
+          onClick={() => {
+            createModal.show();
+          }}>+ Add new bus</Button
+        >
+      {/if}
     </div>
   </TableHeader>
 
@@ -147,6 +150,10 @@
           <TableBodyHeader class="col-span-1">Name</TableBodyHeader>
           <TableBodyHeader class="col-span-1">License</TableBodyHeader>
           <TableBodyHeader class="col-span-1">Driver</TableBodyHeader>
+          {#if isCommuter($authStore)}
+            <TableBodyHeader class="col-span-1">Reservation</TableBodyHeader>
+            <TableBodyHeader class="col-span-1">Time</TableBodyHeader>
+          {/if}
           <TableBodyHeader class="col-span-1">Status</TableBodyHeader>
           <TableBodyHeader class="col-span-1"></TableBodyHeader>
         </TableHeaderRow>
@@ -154,7 +161,8 @@
         {#each buses?.data || [] as item}
           <TableRow
             onClick={() => {
-              goto(`/buses/${item._id}`);
+              if (isAdmin($authStore) || isManager($authStore))
+                goto(`/buses/${item._id}`);
             }}
             class="items-center hover:cursor-pointer hover:bg-gray-100"
           >
@@ -170,6 +178,17 @@
               class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
               >{item.driver?.first_name || "Not assigned"}</TableCell
             >
+            {#if isCommuter($authStore)}
+              <TableCell
+                class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
+                >{item.reservation?.name || "Not assigned"}</TableCell
+              >
+              <TableCell
+                class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
+                >{item.time || "Not assigned"}</TableCell
+              >
+            {/if}
+
             <TableCell
               class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
               >{item.status ?? "Stopped"}</TableCell
@@ -186,37 +205,40 @@
                   }}><IconLiveView /></TableButton
                 >
               {/if}
-              <TableButton
-                onClick={(e) => {
-                  selectItem(item);
-                  editModal.show();
-                  e.stopPropagation();
-                }}><IconEdit /></TableButton
-              >
-              <TableButton
-                onClick={async (e) => {
-                  e.stopPropagation();
 
-                  let form = new FormData();
+              {#if isAdmin($authStore) || isManager($authStore)}
+                <TableButton
+                  onClick={(e) => {
+                    selectItem(item);
+                    editModal.show();
+                    e.stopPropagation();
+                  }}><IconEdit /></TableButton
+                >
+                <TableButton
+                  onClick={async (e) => {
+                    e.stopPropagation();
 
-                  form.append("_id", item._id);
+                    let form = new FormData();
 
-                  const response = await fetch(`?/delete`, {
-                    method: "POST",
-                    body: form,
-                  });
+                    form.append("_id", item._id);
 
-                  const data = deserialize(await response.text());
+                    const response = await fetch(`?/delete`, {
+                      method: "POST",
+                      body: form,
+                    });
 
-                  if (!validateApiResponse(data)) {
-                    return;
-                  }
+                    const data = deserialize(await response.text());
 
-                  showToaster("Bus deleted");
-                  await invalidateAll();
-                }}><IconTrash /></TableButton
-              ></TableCell
-            >
+                    if (!validateApiResponse(data)) {
+                      return;
+                    }
+
+                    showToaster("Bus deleted");
+                    await invalidateAll();
+                  }}><IconTrash /></TableButton
+                >
+              {/if}
+            </TableCell>
           </TableRow>
         {/each}
       </TableBody>

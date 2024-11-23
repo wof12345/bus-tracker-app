@@ -23,6 +23,7 @@
   import { showToaster } from "$lib/store/toaster";
   import Menu from "$components/Base/Menu/Menu.svelte";
   import Option from "$components/Base/Forms/Components/Option.svelte";
+  import { authStore, isAdmin, isManager } from "$lib/store/auth";
 
   export let data;
 
@@ -329,23 +330,31 @@
           goto("/routes");
         }}><IconArrowLeft size={18} /> Back</Button
       >
-      <Button
-        class="w-max"
-        onClick={() => {
-          goto("/hotspots");
-        }}><IconTarget size={18} /> Create a new hotspot</Button
-      >
+      {#if isAdmin($authStore) || isManager($authStore)}
+        <Button
+          class="w-max"
+          onClick={() => {
+            goto("/hotspots");
+          }}><IconTarget size={18} /> Create a new hotspot</Button
+        >
+      {/if}
     </div>
-    <TableHeader title="Edit route" subtitle="Edit existing route " />
+    {#if isAdmin($authStore) || isManager($authStore)}
+      <TableHeader title="Edit route" subtitle="Edit existing route " />
+    {:else}
+      <TableHeader title="Route" subtitle="Current path for this route " />
+    {/if}
 
-    <InputGroup flow="col">
-      <FormFieldLabel>Select hotspots to form a route</FormFieldLabel>
-      <SearchDropdown
-        options={hotspotsRef}
-        bind:value={selectedHotspot}
-        {onSelect}
-      />
-    </InputGroup>
+    {#if isAdmin($authStore) || isManager($authStore)}
+      <InputGroup flow="col">
+        <FormFieldLabel>Select hotspots to form a route</FormFieldLabel>
+        <SearchDropdown
+          options={hotspotsRef}
+          bind:value={selectedHotspot}
+          {onSelect}
+        />
+      </InputGroup>
+    {/if}
 
     <div
       class="h-max bg-gray-50 min-w-[400px] max-w-[500px] flex flex-wrap gap-2 items-center"
@@ -355,36 +364,38 @@
           on:click={() => {
             map.setView(hotspot.coordinates);
           }}
-          class="border border-gray-400 rounded-lg p-2 h-[80px] max-w-[150px] overflow-hidden flex justify-between gap-2"
+          class="border border-gray-400 rounded-lg p-2 h-max max-w-[150px] overflow-hidden flex justify-between gap-2"
         >
           <p class="text-ellipsis w-[100px] overflow-hidden text-xs">
             {hotspot.name}
           </p>
 
-          <IconButton
-            class="aspect-auto"
-            on:click={() => {
-              let index = selectedHotspots.findIndex(
-                (item) => hotspot.value == item.value,
-              );
+          {#if isAdmin($authStore) || isManager($authStore)}
+            <IconButton
+              class="aspect-auto"
+              on:click={() => {
+                let index = selectedHotspots.findIndex(
+                  (item) => hotspot.value == item.value,
+                );
 
-              let item;
+                let item;
 
-              if (index > -1) {
-                item = selectedHotspots[index];
+                if (index > -1) {
+                  item = selectedHotspots[index];
 
-                hotspotsRef.push(item);
-                selectedHotspots.splice(index, 1);
-              }
+                  hotspotsRef.push(item);
+                  selectedHotspots.splice(index, 1);
+                }
 
-              selectedHotspots = selectedHotspots;
-              hotspotsRef = hotspotsRef;
+                selectedHotspots = selectedHotspots;
+                hotspotsRef = hotspotsRef;
 
-              drawOnMap(selectedHotspots);
-            }}
-          >
-            <IconX size={16} />
-          </IconButton>
+                drawOnMap(selectedHotspots);
+              }}
+            >
+              <IconX size={16} />
+            </IconButton>
+          {/if}
         </button>
 
         {#if selectedHotspots[idx + 1]}
@@ -393,33 +404,35 @@
       {/each}
     </div>
 
-    <InputGroup flow="col">
-      <FormFieldLabel>Name*</FormFieldLabel>
-      <Input placeholder="Route name" bind:value={routeForm.name} />
-    </InputGroup>
+    {#if isAdmin($authStore) || isManager($authStore)}
+      <InputGroup flow="col">
+        <FormFieldLabel>Name*</FormFieldLabel>
+        <Input placeholder="Route name" bind:value={routeForm.name} />
+      </InputGroup>
 
-    <InputGroup flow="col">
-      <FormFieldLabel>Description*</FormFieldLabel>
-      <TextArea
-        placeholder="Route description"
-        bind:value={routeForm.description}
-      />
-    </InputGroup>
+      <InputGroup flow="col">
+        <FormFieldLabel>Description*</FormFieldLabel>
+        <TextArea
+          placeholder="Route description"
+          bind:value={routeForm.description}
+        />
+      </InputGroup>
 
-    <div class="flex justify-between gap-3">
-      <Button
-        onClick={() => {
-          save();
-        }}>Save</Button
-      >
-      <Button
-        onClick={() => {
-          selectedHotspots = [];
+      <div class="flex justify-between gap-3">
+        <Button
+          onClick={() => {
+            save();
+          }}>Save</Button
+        >
+        <Button
+          onClick={() => {
+            selectedHotspots = [];
 
-          hotspotsRef = JSON.parse(JSON.stringify(hotspots));
-        }}>Reset</Button
-      >
-    </div>
+            hotspotsRef = JSON.parse(JSON.stringify(hotspots));
+          }}>Reset</Button
+        >
+      </div>
+    {/if}
   </div>
 </div>
 

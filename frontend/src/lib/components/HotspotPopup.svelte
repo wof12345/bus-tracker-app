@@ -9,6 +9,7 @@
   import InputGroup from "./Base/Forms/Components/InputGroup.svelte";
   import FormFieldLabel from "./Base/Forms/Components/FormFieldLabel.svelte";
   import CheckBox from "./Base/Forms/Inputs/CheckBox.svelte";
+  import { authStore, isAdmin, isManager } from "$lib/store/auth";
 
   export let popupRef;
   export let coordinates;
@@ -114,43 +115,65 @@
     {/if}
 
     {#if item}
-      <InputGroup flow="col">
-        <FormFieldLabel>Name :</FormFieldLabel>
-        <Input
-          containerClass="h-[40px]"
-          bind:value={item.name}
-          placeholder={"Enter custom name"}
-          disabled={!editState}
-        />
-      </InputGroup>
+      {#if isAdmin($authStore) || isManager($authStore)}
+        <InputGroup flow="col">
+          <FormFieldLabel>Name :</FormFieldLabel>
+          <Input
+            containerClass="h-[40px]"
+            bind:value={item.name}
+            placeholder={"Enter custom name"}
+            disabled={!editState}
+          />
+        </InputGroup>
 
-      <InputGroup flow="col">
-        <FormFieldLabel>Description :</FormFieldLabel>
-        <Input
-          bind:value={item.description}
-          placeholder={"Enter description"}
-          disabled={!editState}
-        />
-      </InputGroup>
+        <InputGroup flow="col">
+          <FormFieldLabel>Description :</FormFieldLabel>
+          <Input
+            bind:value={item.description}
+            placeholder={"Enter description"}
+            disabled={!editState}
+          />
+        </InputGroup>
 
-      <InputGroup>
-        <CheckBox
-          disabled={!editState}
-          bind:checked={item.primary}
-          text={"Campus area"}
-        />
-      </InputGroup>
+        <InputGroup>
+          <CheckBox
+            disabled={!editState}
+            bind:checked={item.primary}
+            text={"Campus area"}
+          />
+        </InputGroup>
+      {:else}
+        <InputGroup>
+          <FormFieldLabel>Name :</FormFieldLabel>
+          {item.name}
+        </InputGroup>
+
+        <InputGroup>
+          <FormFieldLabel>Description :</FormFieldLabel>
+          {item.description}
+        </InputGroup>
+
+        <InputGroup class="font-bold">
+          {#if item.primary}
+            Campus area
+          {:else}
+            Not a campus area
+          {/if}
+        </InputGroup>
+      {/if}
     {/if}
 
     {#if !editState}
-      <Button
-        class="mt-2"
-        variant="primary"
-        onClick={(e) => {
-          editState = true;
-          e.stopPropagation();
-        }}>{item ? "Edit" : "New"}</Button
-      >
+      {#if isAdmin($authStore) || isManager($authStore)}
+        <Button
+          class="mt-2"
+          variant="primary"
+          onClick={(e) => {
+            editState = true;
+            e.stopPropagation();
+          }}>{item ? "Edit" : "New"}</Button
+        >
+      {/if}
     {:else if !item}
       <div class="flex flex-col gap-2">
         <InputGroup flow="col">

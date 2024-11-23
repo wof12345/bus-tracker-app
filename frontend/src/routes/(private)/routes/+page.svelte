@@ -16,7 +16,7 @@
   import { validateApiResponse } from "$components/utils/validateApiResponse";
   import { deserialize } from "$app/forms";
   import TableButton from "$components/Base/Table/Components/TableButton.svelte";
-  import { IconTrash, IconEdit } from "@tabler/icons-svelte";
+  import { IconTrash, IconEdit, IconEye } from "@tabler/icons-svelte";
   import Section from "$components/Base/Layout/Section.svelte";
   import TableHeader from "$components/Tables/Components/TableHeader.svelte";
 
@@ -30,6 +30,7 @@
   import TableFrame from "$components/Base/Table/TableFrame.svelte";
   import Pagination from "$components/Base/Table/Components/Pagination.svelte";
   import Badge from "$components/Base/Badge.svelte";
+  import { authStore, isAdmin, isManager } from "$lib/store/auth";
 
   export let data;
 
@@ -47,11 +48,13 @@
 <Section class="flex flex-col gap-0 h-full">
   <TableHeader class="mb-3" title="Routes" subtitle="Manage route routes">
     <div slot="below-head">
-      <Button
-        onClick={() => {
-          goto(`/routes/create`);
-        }}>+ Add new route</Button
-      >
+      {#if isAdmin($authStore) || isManager($authStore)}
+        <Button
+          onClick={() => {
+            goto(`/routes/create`);
+          }}>+ Add new route</Button
+        >
+      {/if}
     </div>
   </TableHeader>
 
@@ -93,38 +96,49 @@
             </TableCell>
             <TableCell
               class="col-span-1 flex justify-end gap-3 font-normal text-sm text-[#475467]"
-              ><TableButton
+            >
+              <TableButton
                 onClick={(e) => {
                   selectItem(item);
                   goto(`/routes/${item._id}/edit`);
 
                   e.stopPropagation();
-                }}><IconEdit /></TableButton
+                }}><IconEye /></TableButton
               >
-              <TableButton
-                onClick={async (e) => {
-                  e.stopPropagation();
+              {#if isAdmin($authStore) || isManager($authStore)}
+                <TableButton
+                  onClick={(e) => {
+                    selectItem(item);
+                    goto(`/routes/${item._id}/edit`);
 
-                  let form = new FormData();
+                    e.stopPropagation();
+                  }}><IconEdit /></TableButton
+                >
+                <TableButton
+                  onClick={async (e) => {
+                    e.stopPropagation();
 
-                  form.append("_id", item._id);
+                    let form = new FormData();
 
-                  const response = await fetch(`?/delete`, {
-                    method: "POST",
-                    body: form,
-                  });
+                    form.append("_id", item._id);
 
-                  const data = deserialize(await response.text());
+                    const response = await fetch(`?/delete`, {
+                      method: "POST",
+                      body: form,
+                    });
 
-                  if (!validateApiResponse(data)) {
-                    return;
-                  }
+                    const data = deserialize(await response.text());
 
-                  showToaster("Hotspot deleted");
-                  await invalidateAll();
-                }}><IconTrash /></TableButton
-              ></TableCell
-            >
+                    if (!validateApiResponse(data)) {
+                      return;
+                    }
+
+                    showToaster("Hotspot deleted");
+                    await invalidateAll();
+                  }}><IconTrash /></TableButton
+                >
+              {/if}
+            </TableCell>
           </TableRow>
         {/each}
       </TableBody>

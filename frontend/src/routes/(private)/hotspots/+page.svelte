@@ -23,6 +23,7 @@
   import Input from "$components/Base/Forms/Inputs/Input.svelte";
   import Menu from "$components/Base/Menu/Menu.svelte";
   import Option from "$components/Base/Forms/Components/Option.svelte";
+  import { authStore, isAdmin, isManager } from "$lib/store/auth";
 
   export let data;
 
@@ -47,6 +48,41 @@
   let search;
   let searchResults = [];
   let searchTimeOut;
+
+  let mapData = [];
+
+  function drawHotspots(hotspots = []) {
+    if (!leaflet) return;
+
+    console.log(hotspots);
+
+    mapData.forEach((layer) => {
+      map.removeLayer(layer);
+    });
+
+    for (let hotspot of hotspots) {
+      const customOptions = {
+        maxWidth: "800",
+        className: "custom",
+      };
+
+      let marker = leaflet
+        ?.marker(hotspot.coordinates)
+        .addTo(map)
+        .bindPopup(popupRef, customOptions);
+
+      marker.on("click", (e) => {
+        selectedItem = hotspot;
+        selectedItemRef = selectedItem
+          ? JSON.parse(JSON.stringify(selectedItem))
+          : undefined;
+      });
+
+      mapData.push(marker);
+    }
+  }
+
+  $: drawHotspots(hotspots.data, leaflet);
 
   async function getAreaCoords(search) {
     let form = new FormData();
@@ -216,90 +252,98 @@
   </Menu>
 </div>
 
-<div id="map" class="relative z-0"></div>
+<div class="h-full flex flex-col">
+  <div id="map" class="relative z-0"></div>
+  <!-- isAdmin($authStore) || isManager($authStore) -->
+  {#if isAdmin($authStore) || isManager($authStore)}
+    <div class="h-[500px]">
+      <Section class="flex flex-col gap-0 h-full py-3">
+        <TableHeader
+          class="mb-3"
+          title="Hotspots"
+          subtitle=" Create or edit hotpots"
+        />
 
-<div class="info-container">
-  <Section class="flex flex-col gap-0 h-full py-3">
-    <TableHeader
-      class="mb-3"
-      title="Hotspots"
-      subtitle=" Create or edit hotpots"
-    />
+        <Table>
+          <TableFrame>
+            <TableBody>
+              <TableHeaderRow>
+                <TableBodyHeader class="col-span-1">Name</TableBodyHeader>
+                <TableBodyHeader class="col-span-1">Location</TableBodyHeader>
+                <TableBodyHeader class="col-span-1">Description</TableBodyHeader
+                >
+                <TableBodyHeader class="col-span-1"></TableBodyHeader>
+              </TableHeaderRow>
 
-    <Table>
-      <TableFrame>
-        <TableBody>
-          <TableHeaderRow>
-            <TableBodyHeader class="col-span-1">Name</TableBodyHeader>
-            <TableBodyHeader class="col-span-1">Location</TableBodyHeader>
-            <TableBodyHeader class="col-span-1">Description</TableBodyHeader>
-            <TableBodyHeader class="col-span-1"></TableBodyHeader>
-          </TableHeaderRow>
-
-          {#each hotspots?.data || [] as item}
-            <TableRow
-              class="items-center hover:cursor-pointer hover:bg-slate-100"
-              onClick={(e) => {
-                selectItem(item);
-
-                e.stopPropagation();
-              }}
-            >
-              <TableCell
-                class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-                >{item?.name}</TableCell
-              >
-              <TableCell
-                class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-                >{item?.location_name}</TableCell
-              >
-              <TableCell
-                class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-                >{item?.description}</TableCell
-              >
-              <TableCell
-                class="col-span-1 flex justify-end gap-3 font-normal text-sm text-[#475467]"
-                ><TableButton
+              {#each hotspots?.data || [] as item}
+                <TableRow
+                  class="items-center hover:cursor-pointer hover:bg-slate-100"
                   onClick={(e) => {
                     selectItem(item);
-                    popupEditState = true;
 
                     e.stopPropagation();
-                  }}><IconEdit /></TableButton
+                  }}
                 >
-                <TableButton
-                  onClick={async (e) => {
-                    e.stopPropagation();
+                  <TableCell
+                    class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
+                    >{item?.name}</TableCell
+                  >
+                  <TableCell
+                    class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
+                    >{item?.location_name}</TableCell
+                  >
+                  <TableCell
+                    class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
+                    >{item?.description}</TableCell
+                  >
+                  <TableCell
+                    class="col-span-1 flex justify-end gap-3 font-normal text-sm text-[#475467]"
+                    ><TableButton
+                      onClick={(e) => {
+                        selectItem(item);
+                        popupEditState = true;
 
-                    let form = new FormData();
+                        e.stopPropagation();
+                      }}><IconEdit /></TableButton
+                    >
+                    <TableButton
+                      onClick={async (e) => {
+                        e.stopPropagation();
 
-                    form.append("_id", item._id);
+                        let form = new FormData();
 
-                    const response = await fetch(`?/delete`, {
-                      method: "POST",
-                      body: form,
-                    });
+                        form.append("_id", item._id);
 
-                    const data = deserialize(await response.text());
+                        const response = await fetch(`?/delete`, {
+                          method: "POST",
+                          body: form,
+                        });
 
-                    if (!validateApiResponse(data)) {
-                      return;
-                    }
+                        const data = deserialize(await response.text());
 
-                    showToaster("Hotspot deleted");
-                    await invalidateAll();
-                  }}><IconTrash /></TableButton
-                ></TableCell
-              >
-            </TableRow>
-          {/each}
-        </TableBody>
-      </TableFrame>
-      <TableFooter>
-        <Pagination totalItems={hotspots?.total || 0} onPageChange={() => {}} />
-      </TableFooter>
-    </Table>
-  </Section>
+                        if (!validateApiResponse(data)) {
+                          return;
+                        }
+
+                        showToaster("Hotspot deleted");
+                        await invalidateAll();
+                      }}><IconTrash /></TableButton
+                    ></TableCell
+                  >
+                </TableRow>
+              {/each}
+            </TableBody>
+          </TableFrame>
+          <TableFooter>
+            <Pagination
+              totalItems={hotspots?.total || 0}
+              onPageChange={() => {}}
+            />
+          </TableFooter>
+        </Table>
+      </Section>
+    </div>
+  {/if}
 </div>
 
 <HotspotPopup
@@ -313,7 +357,7 @@
 
 <style>
   #map {
-    height: 400px;
+    height: 100%;
     width: 100%;
   }
 </style>

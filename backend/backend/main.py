@@ -92,21 +92,21 @@ app.include_router(
     vehicles.router,
     tags=['vehicles'],
     prefix='/vehicles',
-    dependencies=[Depends(role_required([RoleEnum.ADMIN]))],
+    dependencies=[Depends(auth_scheme)],
 )
 
 app.include_router(
     routes.router,
     tags=['routes'],
     prefix='/routes',
-    dependencies=[Depends(role_required([RoleEnum.ADMIN]))],
+    dependencies=[Depends(auth_scheme)],
 )
 
 app.include_router(
     hotspots.router,
     tags=['hotspots'],
     prefix='/hotspots',
-    dependencies=[Depends(role_required([RoleEnum.ADMIN]))],
+    dependencies=[Depends(auth_scheme)],
 )
 
 app.include_router(

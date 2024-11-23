@@ -99,6 +99,7 @@ async def broadCastLiveData(vehicle_id):
 
 
 def call_async_broadCastLiveData(vehicle_id):
+    print(timer)
     run(broadCastLiveData(vehicle_id))
 
 
@@ -119,7 +120,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     timer[vehicle_id].add_job(
                         call_async_broadCastLiveData,
                         'interval',
-                        seconds=3,
+                        seconds=1,
                         args=[vehicle_id],
                     )
                     timer[vehicle_id].start()

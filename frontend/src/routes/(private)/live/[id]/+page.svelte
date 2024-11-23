@@ -140,7 +140,7 @@
   });
 
   onDestroy(() => {
-    socket.close(1000, "Client disconnected");
+    socket?.close(1000, "Client disconnected");
   });
 </script>
 
