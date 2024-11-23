@@ -177,6 +177,8 @@
     await invalidateAll();
   }
 
+  $: console.log(busForm);
+
   onMount(() => {});
 </script>
 

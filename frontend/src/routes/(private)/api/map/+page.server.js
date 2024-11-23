@@ -30,7 +30,7 @@ export const actions = {
 
         let search = formData.get("search");
 
-        console.log(search);
+
 
 
         try {
@@ -59,6 +59,10 @@ export const actions = {
         const url = `https://api.openrouteservice.org/v2/directions/driving-car`;
         const body = {
             coordinates: [start, end],
+            alternative_routes: {
+                share_factor: 0.6,  // How similar alternative routes are to the main route (0.0 - 1.0)
+                target_count: 3     // Number of alternative routes
+            }
         };
 
         try {

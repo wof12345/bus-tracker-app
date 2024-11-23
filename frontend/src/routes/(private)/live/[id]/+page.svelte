@@ -151,7 +151,7 @@
     <Button
       class="w-max"
       onClick={() => {
-        goto("/routes");
+        history.back();
       }}><IconArrowLeft size={18} /> Back</Button
     >
     <TableHeader

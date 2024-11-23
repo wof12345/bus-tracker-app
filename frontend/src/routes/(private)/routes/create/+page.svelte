@@ -157,6 +157,8 @@
 
     const data = deserialize(await response.text());
 
+    console.log(data);
+
     if (data.data.routes && data.data.routes[0]) {
       let geometry = data.data.routes[0].geometry;
 

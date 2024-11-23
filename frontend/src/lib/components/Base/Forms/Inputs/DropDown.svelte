@@ -43,7 +43,8 @@
   let selectedItem;
 
   const handleClick = (idx: number, option: any, selectedElm: any) => {
-    if (getFullValue) value = selectedElm + "";
+    console.log(selectedElm);
+    if (getFullValue) value = selectedElm;
     else value = formData[name] = option.value || option;
     active = option.value;
 
@@ -129,7 +130,9 @@
               value?.name ||
               getValue(value)?.view_name ||
               getValue(value)?.name ||
-              (typeof value === "string" ? value : undefined) ||
+              (typeof value === "string" || typeof value === "number"
+                ? value
+                : undefined) ||
               placeholder ||
               "- Select one -"}
             onkeypress={!editable ? "return false" : ""}
@@ -159,7 +162,9 @@
               value?.name ||
               getValue(value)?.view_name ||
               getValue(value)?.name ||
-              (typeof value === "string" ? value : undefined) ||
+              (typeof value === "string" || typeof value === "number"
+                ? value
+                : undefined) ||
               ""}
             onkeypress={!editable ? "return false" : ""}
             autocomplete="off"

@@ -256,7 +256,7 @@
   <div id="map" class="relative z-0"></div>
   <!-- isAdmin($authStore) || isManager($authStore) -->
   {#if isAdmin($authStore) || isManager($authStore)}
-    <div class="h-[500px]">
+    <div class="h-[40%]">
       <Section class="flex flex-col gap-0 h-full py-3">
         <TableHeader
           class="mb-3"

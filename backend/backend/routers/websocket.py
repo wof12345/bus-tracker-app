@@ -14,6 +14,8 @@ router = APIRouter()
 
 clients: List[WebSocket] = []
 
+active_client_sessions = {}
+
 timer = {}
 
 simulationDetails = {}
@@ -74,7 +76,7 @@ def simulateBus(id):
 
             simulationDetails[vehicle_id] = simulationDetails[vehicle_id] + 1
         else:
-            timer[vehicle_id].shutdown()
+            timer[vehicle_id].shutdown(wait=False)
             del timer[vehicle_id]
             simulationDetails[vehicle_id] = None
             returnObject['coordinates'] = None
@@ -99,7 +101,6 @@ async def broadCastLiveData(vehicle_id):
 
 
 def call_async_broadCastLiveData(vehicle_id):
-    print(timer)
     run(broadCastLiveData(vehicle_id))
 
 
@@ -114,6 +115,13 @@ async def websocket_endpoint(websocket: WebSocket):
 
             vehicle = json.loads(data)
             vehicle_id = vehicle['_id']
+
+            if vehicle_id not in active_client_sessions:
+                active_client_sessions[vehicle_id] = []
+                active_client_sessions[vehicle_id].append(websocket)
+            else:
+                active_client_sessions[vehicle_id].append(websocket)
+
             if vehicle_id:
                 if vehicle_id not in timer:
                     timer[vehicle_id] = BackgroundScheduler()
@@ -129,3 +137,8 @@ async def websocket_endpoint(websocket: WebSocket):
         print('error', e)
         print(f"Connection origin: {websocket.headers.get('origin')}")
         clients.remove(websocket)
+        if vehicle_id in active_client_sessions:
+            active_client_sessions[vehicle_id].remove(websocket)
+            if len(active_client_sessions[vehicle_id]) == 0:
+                timer[vehicle_id].shutdown(wait=False)
+                del timer[vehicle_id]
