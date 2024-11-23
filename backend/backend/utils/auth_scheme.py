@@ -27,7 +27,7 @@ class AuthenticateUser(HTTPBearer):
         if payload:
             if 'sub' in payload and 'role' in payload:
                 user_role = payload['role']
-                if user_role in ['admin', 'teacher', 'student']:
+                if user_role in ['admin', 'commuter', 'driver', 'helper', 'manager']:
                     return payload
                 else:
                     raise HTTPException(

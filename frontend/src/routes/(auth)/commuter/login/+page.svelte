@@ -58,7 +58,7 @@
       </div>
     </div>
 
-    <Form {error} action="/student/login?/login" class=" mx-auto w-full">
+    <Form {error} action="/commuter/login?/login" class=" mx-auto w-full">
       <div class="space-y-6">
         <div class="-mb-5 space-y-5">
           <div class="w-full space-y-2">
@@ -100,17 +100,17 @@
       <div class="footer-text">
         <Paragraph class="text-gray-600">Don’t have an account?</Paragraph>
 
-        <a href="/student/register">
+        <a href="/commuter/register">
           <Paragraph class="font-semibold text-[#6941C6]">Sign up</Paragraph>
         </a>
       </div>
 
       <div class="footer-text">
-        <Paragraph class="text-gray-600">Not a student?</Paragraph>
+        <Paragraph class="text-gray-600">Not a commuter?</Paragraph>
 
-        <a href="/tutor/login">
+        <a href="/driver/login">
           <Paragraph class="font-semibold text-[#6941C6]">
-            Login as a tutor</Paragraph
+            Login as a driver</Paragraph
           >
         </a>
       </div>

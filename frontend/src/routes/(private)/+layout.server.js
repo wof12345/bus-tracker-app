@@ -6,7 +6,7 @@ export const load = async (event) => {
   const { user } = await parent();
 
   if (!user) {
-    redirect(307, '/')
+    redirect(307, '/commuter/login')
   }
 
   return {

@@ -43,7 +43,7 @@ const logout = async () => {
   const data = deserialize(await res.text());
 
   if (data.status === 200) {
-    goto("/");
+    goto("/commuter/login");
     authStore.set({ isAuthenticated: false, user: undefined });
   }
 };

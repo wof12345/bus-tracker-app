@@ -14,16 +14,30 @@ from backend.utils.pagination import get_pagination_data
 router = APIRouter()
 
 
-@router.get('/buses_by_reservations')
+@router.get('/buses-by-reservations')
 def get_all_reservations():
-    collection = database['vehicle']
+    collection = database['vehicles']
 
     statistics = {}
+    total = 0
+    unreserved = 0
 
     vehicles = list(collection.find())
 
-    print(vehicles)
+    for vehicle in vehicles:
+        total += 1
+        if vehicle['reservation'] is not None:
+            reservation_name = vehicle['reservation']['name']
 
-    return {
-        'data': vehicles,
-    }
+            if reservation_name not in statistics:
+                statistics[reservation_name] = 1
+            else:
+                statistics[reservation_name] += 1
+
+        else:
+            unreserved += 0
+
+    statistics['Total'] = total
+    statistics['Unreserved'] = unreserved
+
+    return statistics

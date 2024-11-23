@@ -1,17 +1,13 @@
 import api from "$lib/api/api";
-export const load = async ({ cookies, fetch, url }) => {
+export const load = async ({ cookies, fetch }) => {
   const token = cookies.get("token");
 
 
-  const page = url.searchParams.get("page") || "1";
-  const status = url.searchParams.get("status");
-
-
-  const getPayouts = async () => {
+  const getStats = async () => {
     try {
-      let params = status ? { page, status } : { page };
+      let params = {};
 
-      const tutorPayouts = await api.get("/vehicles/", token, fetch, params);
+      const tutorPayouts = await api.get("/statistics/buses-by-reservations", token, fetch, params);
       const data = await tutorPayouts.json();
 
       return data;
@@ -21,6 +17,6 @@ export const load = async ({ cookies, fetch, url }) => {
   };
 
   return {
-    payouts: await getPayouts(),
+    statistics: await getStats(),
   };
 };

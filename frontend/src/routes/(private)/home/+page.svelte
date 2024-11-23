@@ -11,76 +11,28 @@
 
   export let data;
 
-  $: tutorPayouts = data?.payouts;
+  $: console.log(data);
+
+  $: statistics = data?.statistics;
 </script>
 
 <Section class="flex flex-col gap-0 h-full">
   <TableHeader class="mb-3" title="Home" subtitle="Current app statistics" />
 
   <div class="grid grid-cols-3 gap-3">
-    <Card>
-      <Container class="justify-between">
-        <Paragraph class="font-medium md:text-sm">Total Bus</Paragraph>
-        <div>
-          <IconHighlight class="text-gray-400" />
-        </div>
-      </Container>
+    {#each Object.keys(statistics) as stat}
+      <Card>
+        <Container class="justify-between">
+          <Paragraph class="font-medium md:text-sm">{stat} Bus</Paragraph>
+          <div>
+            <IconHighlight class="text-gray-400" />
+          </div>
+        </Container>
 
-      <Header class="flex items-center gap-2 md:text-3xl">
-        <CountingAnimation number={100} />
-      </Header>
-    </Card>
-
-    <Card>
-      <Container class="justify-between">
-        <Paragraph class="font-medium md:text-sm">Male Bus</Paragraph>
-        <div>
-          <IconHighlight class="text-gray-400" />
-        </div>
-      </Container>
-
-      <Header class="flex items-center gap-2 md:text-3xl">
-        <CountingAnimation number={100} />
-      </Header>
-    </Card>
-
-    <Card>
-      <Container class="justify-between">
-        <Paragraph class="font-medium md:text-sm">Female Bus</Paragraph>
-        <div>
-          <IconHighlight class="text-gray-400" />
-        </div>
-      </Container>
-
-      <Header class="flex items-center gap-2 md:text-3xl">
-        <CountingAnimation number={100} />
-      </Header>
-    </Card>
-
-    <Card>
-      <Container class="justify-between">
-        <Paragraph class="font-medium md:text-sm">Teacher Bus</Paragraph>
-        <div>
-          <IconHighlight class="text-gray-400" />
-        </div>
-      </Container>
-
-      <Header class="flex items-center gap-2 md:text-3xl">
-        <CountingAnimation number={100} />
-      </Header>
-    </Card>
-
-    <Card>
-      <Container class="justify-between">
-        <Paragraph class="font-medium md:text-sm">Eployee Bus</Paragraph>
-        <div>
-          <IconHighlight class="text-gray-400" />
-        </div>
-      </Container>
-
-      <Header class="flex items-center gap-2 md:text-3xl">
-        <CountingAnimation number={100} />
-      </Header>
-    </Card>
+        <Header class="flex items-center gap-2 md:text-3xl">
+          <CountingAnimation number={statistics[stat]} />
+        </Header>
+      </Card>
+    {/each}
   </div>
 </Section>
