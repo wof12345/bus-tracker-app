@@ -178,12 +178,14 @@
             <TableCell
               class="col-span-1 flex justify-end gap-3 font-normal text-sm text-[#475467]"
             >
-              <TableButton
-                onClick={(e) => {
-                  goto("/live");
-                  e.stopPropagation();
-                }}><IconLiveView /></TableButton
-              >
+              {#if item.route}
+                <TableButton
+                  onClick={(e) => {
+                    goto(`/live/${item._id}`);
+                    e.stopPropagation();
+                  }}><IconLiveView /></TableButton
+                >
+              {/if}
               <TableButton
                 onClick={(e) => {
                   selectItem(item);

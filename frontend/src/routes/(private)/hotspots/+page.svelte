@@ -236,7 +236,7 @@
             <TableBodyHeader class="col-span-1"></TableBodyHeader>
           </TableHeaderRow>
 
-          {#each hotspots.data || [] as item}
+          {#each hotspots?.data || [] as item}
             <TableRow
               class="items-center hover:cursor-pointer hover:bg-slate-100"
               onClick={(e) => {

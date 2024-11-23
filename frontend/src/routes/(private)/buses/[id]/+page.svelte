@@ -28,8 +28,9 @@
   import { deserialize } from "$app/forms";
   import { validateApiResponse } from "$components/utils/validateApiResponse.js";
   import { showToaster } from "$lib/store/toaster.ts";
-  import { invalidateAll } from "$app/navigation";
+  import { goto, invalidateAll } from "$app/navigation";
   import { validateInput } from "$components/utils/validation/validation.js";
+  import { IconLiveView } from "@tabler/icons-svelte";
 
   export let data;
 
@@ -117,11 +118,13 @@
   function fillFormData() {
     busForm = JSON.parse(JSON.stringify(vehicle));
 
-    let time = busForm.time.split(":");
+    let time = busForm.time?.split(":");
 
-    timeForm.hour = time[0];
-    timeForm.minute = time[1];
-    timeForm.clock = time[2];
+    if (time) {
+      timeForm.hour = time[0];
+      timeForm.minute = time[1];
+      timeForm.clock = time[2];
+    }
   }
 
   $: fillFormData(vehicle);
@@ -178,13 +181,25 @@
 </script>
 
 <Section class="flex flex-col gap-0">
-  <div class="w-full">
-    <h1 class="font-semibold text-[#101828] text-3xl">
-      {vehicle.name} <span class=" pl-2 text-xs">({vehicle._id})</span>
-    </h1>
-    <p class="font-normal text-[#475467] text-base mt-1">
-      View the details of bus {vehicle.name}
-    </p>
+  <div class="w-full flex justify-between">
+    <div>
+      <h1 class="font-semibold text-[#101828] text-3xl">
+        {vehicle.name} <span class=" pl-2 text-xs">({vehicle._id})</span>
+      </h1>
+      <p class="font-normal text-[#475467] text-base mt-1">
+        View the details of bus {vehicle.name}
+      </p>
+    </div>
+
+    {#if vehicle?.route}
+      <Button
+        class="w-max"
+        onClick={(e) => {
+          goto(`/live/${vehicle._id}`);
+          e.stopPropagation();
+        }}><IconLiveView /> Show on map</Button
+      >
+    {/if}
   </div>
 
   <Tab class="mt-6">

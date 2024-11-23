@@ -18,7 +18,7 @@ class VehicleCreate(BaseModel):
     starting_point: Optional[Hotspot] = None
     route: Optional[Route] = None
     time: Optional[str] = None
-    current_coordinates: Optional[list[Optional[str]]] = None
+    current_coordinates: Optional[list[Optional[float]]] = None
 
 
 class VehicleUpdate(BaseModel):
@@ -31,7 +31,7 @@ class VehicleUpdate(BaseModel):
     starting_point: Optional[Hotspot] = None
     route: Optional[Route] = None
     time: Optional[str] = None
-    current_coordinates: Optional[list[Optional[str]]] = None
+    current_coordinates: Optional[list[Optional[float]]] = None
 
 
 class Vehicle(BaseModel):
@@ -45,7 +45,7 @@ class Vehicle(BaseModel):
     starting_point: Optional[Hotspot] = None
     route: Optional[Route] = None
     time: Optional[str] = None
-    current_coordinates: Optional[list[Optional[str]]] = None
+    current_coordinates: Optional[list[Optional[float]]] = None
 
     class Config:
         populate_by_name = True

@@ -15,6 +15,7 @@ from backend.routers import (
     routes,
     websocket,
     reservations,
+    statistics,
 )
 from fastapi import HTTPException, Depends
 from backend.utils.auth_scheme import auth_scheme
@@ -69,6 +70,13 @@ app.include_router(
     users.router,
     tags=['users'],
     prefix='/users',
+    dependencies=[Depends(auth_scheme)],
+)
+
+app.include_router(
+    statistics.router,
+    tags=['statistics'],
+    prefix='/statistics',
     dependencies=[Depends(auth_scheme)],
 )
 
