@@ -2,6 +2,7 @@ from models.YOLOv8.main import getLicensePlatesFromVideo
 from fastapi import APIRouter
 from fastapi import APIRouter, File, UploadFile, HTTPException
 from typing import Optional
+from backend.services.license_detection import update_vehicle_based_on_plate
 
 
 router = APIRouter()
@@ -24,6 +25,7 @@ def extract_license_plates(
     output_path: Optional[str] = None,
     max_frames: Optional[int] = 100,
 ):
+    # In a real-world scenerio the video will be streamed either from the camera directly or through an intermediary platform based on the camera's specs. This just simulates the video.
     if file.content_type not in VIDEO_MIME_TYPES:
         raise HTTPException(
             status_code=400, detail='Invalid file type. Please upload a video.'
@@ -40,5 +42,7 @@ def extract_license_plates(
         output_path=output_path,
         show_video_simulation=show_video_simulation,
     )
+
+    update_vehicle_based_on_plate(plates)
 
     return plates

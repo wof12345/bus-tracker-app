@@ -150,14 +150,18 @@
     mapData.push(marker);
   }
 
-  async function drawOnMap(array, callDraw = true) {
+  async function drawOnMap(array) {
     totalLine = [];
+
+    console.log("called");
+
     mapData.forEach((layer) => {
       map.removeLayer(layer);
     });
     mapData = [];
 
-    let it = 0;
+    let promisesToResolve = [];
+
     array.forEach((elm, idx) => {
       addMarker(elm.coordinates);
       map.setView(elm.coordinates);
@@ -167,9 +171,14 @@
       });
       mapLines = [];
 
-      if (idx > 0 && callDraw)
-        getAndSetPath(array[idx - 1].coordinates, elm.coordinates, it);
+      if (idx > 0) {
+        promisesToResolve.push(
+          getAndSetPath(array[idx - 1].coordinates, elm.coordinates),
+        );
+      }
     });
+
+    await Promise.all(promisesToResolve);
   }
 
   async function getORSRoute(start, end) {
@@ -312,7 +321,7 @@
       <Input bind:value={search} placeholder={"Search a location"} />
 
       <Menu
-        class="max-h-[400px]"
+        class="max-h-[500px]"
         visible={searchResults.length > 0}
         parentWidth={true}
         anchorEelement={"search_anchor"}
@@ -368,7 +377,7 @@
     {/if}
 
     <div
-      class="h-max bg-gray-50 min-w-[400px] max-w-[500px] flex flex-wrap gap-2 items-center"
+      class="h-max bg-gray-50 min-w-[500px] max-w-[500px] flex flex-wrap gap-2 items-center"
     >
       {#each selectedHotspots as hotspot, idx}
         <button

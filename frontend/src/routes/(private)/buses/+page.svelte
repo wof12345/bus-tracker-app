@@ -48,6 +48,7 @@
   let createModal;
   let editModal;
 
+  $: console.log(data);
   function selectItem(item) {
     selectedBus = item;
     selectedBusRef = JSON.parse(JSON.stringify(item));

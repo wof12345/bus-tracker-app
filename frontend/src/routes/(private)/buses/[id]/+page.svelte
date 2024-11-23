@@ -142,6 +142,8 @@
         "starting_point",
         "current_coordinates",
         "time",
+        "status",
+        "in_campus",
       ])
     ) {
       busForm = busForm;
@@ -228,14 +230,14 @@
             <TextArea disabled={!editState} bind:value={busForm.description} />
           </InputGroup>
 
-          <InputGroup flow="col">
+          <!-- <InputGroup flow="col">
             <FormFieldLabel>Starting point</FormFieldLabel>
             <SearchDropdown
               disabled={!editState}
               bind:value={busForm.starting_point}
               options={hotspotOptions}
             />
-          </InputGroup>
+          </InputGroup> -->
 
           <InputGroup flow="col">
             <FormFieldLabel>Starting time</FormFieldLabel>

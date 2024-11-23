@@ -126,7 +126,6 @@
     mapData.push(marker);
   }
 
-  $: console.log(mapLines, totalLine);
   async function drawOnMap(array) {
     totalLine = [];
 
@@ -136,6 +135,8 @@
       map.removeLayer(layer);
     });
     mapData = [];
+
+    let promisesToResolve = [];
 
     array.forEach((elm, idx) => {
       addMarker(elm.coordinates);
@@ -147,9 +148,13 @@
       mapLines = [];
 
       if (idx > 0) {
-        getAndSetPath(array[idx - 1].coordinates, elm.coordinates);
+        promisesToResolve.push(
+          getAndSetPath(array[idx - 1].coordinates, elm.coordinates),
+        );
       }
     });
+
+    await Promise.all(promisesToResolve);
   }
 
   $: drawOnMap(selectedHotspots);
@@ -294,7 +299,7 @@
       <Input bind:value={search} placeholder={"Search a location"} />
 
       <Menu
-        class="max-h-[400px]"
+        class="max-h-[500px]"
         visible={searchResults.length > 0}
         parentWidth={true}
         anchorEelement={"search_anchor"}
@@ -314,7 +319,7 @@
   </div>
 
   <div
-    class="bg-white rounded-md flex flex-col p-4 gap-4 h-screen overflow-auto"
+    class="bg-white rounded-md flex flex-col p-4 gap-4 h-screen w-max- max-w-[500px] overflow-auto"
   >
     <div class="flex justify-between gap-3">
       <Button
@@ -342,7 +347,7 @@
     </InputGroup>
 
     <div
-      class="h-max bg-gray-50 min-w-[400px] max-w-[500px] flex flex-wrap gap-2 items-center"
+      class="h-max bg-gray-50 min-w-[500px] w-max max-w-[500px] flex flex-wrap gap-2 items-center"
     >
       {#each selectedHotspots as hotspot, idx}
         <button

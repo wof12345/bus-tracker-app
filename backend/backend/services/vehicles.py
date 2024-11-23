@@ -13,3 +13,9 @@ def update_vehicle(update_data, id):
     )
 
     return updated_vehicle
+
+
+def get_vehicle(filters):
+    vehicle = collection.find_one(filters)
+
+    return vehicle

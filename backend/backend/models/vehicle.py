@@ -42,9 +42,11 @@ class Vehicle(BaseModel):
     driver: Optional[User] = None
     helper: Optional[User] = None
     reservation: Optional[Reservation] = None
+    status: Optional[str] = None
     starting_point: Optional[Hotspot] = None
     route: Optional[Route] = None
     time: Optional[str] = None
+    in_campus: Optional[str] = None
     current_coordinates: Optional[list[Optional[float]]] = None
 
     class Config:
