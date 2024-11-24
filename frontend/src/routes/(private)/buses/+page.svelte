@@ -48,7 +48,6 @@
   let createModal;
   let editModal;
 
-  $: console.log(data);
   function selectItem(item) {
     selectedBus = item;
     selectedBusRef = JSON.parse(JSON.stringify(item));
@@ -98,6 +97,8 @@
         "starting_point",
         "current_coordinates",
         "time",
+        "in_campus",
+        "status",
       ])
     ) {
       selectedBusRef = selectedBusRef;

@@ -34,10 +34,12 @@
 
   export let data;
 
-  $: routees = data?.routes;
+  $: routes = data?.routes;
 
   let selectedRoute;
   let selectedRouteRef;
+
+  $: console.log(routes);
 
   function selectItem(item) {
     selectedRoute = item;
@@ -68,7 +70,7 @@
           <TableBodyHeader class="col-span-1"></TableBodyHeader>
         </TableHeaderRow>
 
-        {#each routees?.data || [] as item}
+        {#each routes?.data || [] as item}
           <TableRow
             onClick={() => {}}
             class="items-center hover:cursor-pointer hover:bg-gray-100"
@@ -84,8 +86,8 @@
             <TableCell
               class="col-span-1 flex gap-1.5 font-normal text-sm text-[#475467]"
             >
-              {#each item.hotspots as hotspot, idx}
-                {#if idx < 2}
+              {#each item.hotspots as hotspot, idx (idx)}
+                {#if idx <= 2}
                   <Badge class="bg-primary-500 text-white">
                     {hotspot.name}
                   </Badge>
@@ -144,7 +146,7 @@
       </TableBody>
     </TableFrame>
     <TableFooter>
-      <Pagination totalItems={routees?.total || 0} onPageChange={() => {}} />
+      <Pagination totalItems={routes?.total || 0} onPageChange={() => {}} />
     </TableFooter>
   </Table>
 </Section>

@@ -10,6 +10,12 @@ from bson import ObjectId
 from backend.database import database
 from backend.utils.validate_object_id import validate_object_id
 from backend.utils.pagination import get_pagination_data
+from backend.utils.db_util import (
+    populate_ref_array,
+    populate_ref,
+    populate_single_ref_array,
+)
+from backend.services.routes import get_route
 
 router = APIRouter()
 
@@ -38,6 +44,8 @@ def get_all_routes(page: int = 1, per_page: int = 10):
     total = collection.count_documents({})
     routes = list(collection.find().skip(skip).limit(limit))
 
+    routes = populate_ref_array(routes, 'hotspots', 'hotspots')
+
     return {
         'total': total,
         'page': page,
@@ -48,7 +56,9 @@ def get_all_routes(page: int = 1, per_page: int = 10):
 @router.get('/{id}', response_model=Route)
 def get_route_by_id(id: str = Path(..., title='Route ID')):
     validate_object_id(id)
-    route = collection.find_one({'_id': ObjectId(id)})
+
+    route = get_route({'_id': ObjectId(id)})
+
     if route:
         return route
     raise HTTPException(status_code=404, detail='Route not found')

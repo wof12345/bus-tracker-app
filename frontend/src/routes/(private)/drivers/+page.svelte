@@ -166,7 +166,9 @@
           >
             <TableCell
               class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-              >{(item.first_name ?? " ") + (item.last_name ?? " ")}</TableCell
+              >{(item.first_name ?? " ") +
+                " " +
+                (item.last_name ?? " ")}</TableCell
             >
             <TableCell
               class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"

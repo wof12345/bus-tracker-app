@@ -8,9 +8,16 @@ from backend.models.vehicle import (
     AllVehicleResponse,
     VehicleUpdate,
 )
-from backend.services.vehicles import update_vehicle
+from backend.services.vehicles import update_vehicle, get_vehicle
 from bson import ObjectId
 from pymongo import ReturnDocument
+from backend.utils.db_util import (
+    populate_ref_array,
+    populate_ref,
+    populate_single_ref_array,
+    populate_array_ref,
+)
+
 
 router = APIRouter()
 
@@ -36,6 +43,11 @@ def get_all_vehicles(page: int = 1, per_page: int = 10):
     total = collection.count_documents({})
     vehicles = list(collection.find().skip(skip).limit(limit))
 
+    vehicles = populate_array_ref(vehicles, 'users', 'driver')
+    vehicles = populate_array_ref(vehicles, 'users', 'helper')
+    vehicles = populate_array_ref(vehicles, 'routes', 'route')
+    vehicles = populate_array_ref(vehicles, 'reservations', 'reservation')
+
     return {
         'total': total,
         'page': page,
@@ -46,7 +58,7 @@ def get_all_vehicles(page: int = 1, per_page: int = 10):
 @router.get('/{id}', response_model=Vehicle)
 def get_vehicle_by_id(id: str = Path(..., title='Vehicles ID')):
     validate_object_id(id)
-    vehicle = collection.find_one({'_id': ObjectId(id)})
+    vehicle = get_vehicle({'_id': ObjectId(id)})
     if vehicle:
         return vehicle
     raise HTTPException(status_code=404, detail='Vehicles not found')

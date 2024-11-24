@@ -75,6 +75,7 @@
     return [lng, lat];
   }
 
+  $: console.log(selectedHotspots);
   async function save() {
     let form = new FormData();
 
@@ -150,10 +151,8 @@
     mapData.push(marker);
   }
 
-  async function drawOnMap(array) {
+  async function drawOnMap(array, callDraw = true) {
     totalLine = [];
-
-    console.log("called");
 
     mapData.forEach((layer) => {
       map.removeLayer(layer);
@@ -171,7 +170,7 @@
       });
       mapLines = [];
 
-      if (idx > 0) {
+      if (idx > 0 && callDraw) {
         promisesToResolve.push(
           getAndSetPath(array[idx - 1].coordinates, elm.coordinates),
         );

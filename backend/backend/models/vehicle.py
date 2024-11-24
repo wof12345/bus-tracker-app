@@ -46,7 +46,7 @@ class Vehicle(BaseModel):
     starting_point: Optional[Hotspot] = None
     route: Optional[Route] = None
     time: Optional[str] = None
-    in_campus: Optional[str] = None
+    in_campus: Optional[bool] = None
     current_coordinates: Optional[list[Optional[float]]] = None
 
     class Config:

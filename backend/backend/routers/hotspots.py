@@ -10,6 +10,11 @@ from bson import ObjectId
 from backend.database import database
 from backend.utils.validate_object_id import validate_object_id
 from backend.utils.pagination import get_pagination_data
+from backend.utils.db_util import (
+    populate_ref_array,
+    populate_ref,
+    populate_single_ref_array,
+)
 
 router = APIRouter()
 

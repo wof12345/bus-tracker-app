@@ -53,6 +53,8 @@ export const actions = {
     let lines = JSON.parse(formData.get("lines"));
     let hotspots = JSON.parse(formData.get("hotspots"));
 
+    console.log(hotspots);
+
     try {
       const res = await api.put(`/routes/${_id}`, token, fetch, {
         body: { name, lines, description, coordinates, hotspots },

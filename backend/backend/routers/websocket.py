@@ -7,7 +7,8 @@ import json
 from backend.utils.timer import RepeatedTimer
 from apscheduler.schedulers.background import BackgroundScheduler
 from asyncio import run
-from backend.services.vehicles import update_vehicle
+from backend.services.vehicles import update_vehicle, get_vehicle
+from backend.services.routes import get_route
 
 
 router = APIRouter()
@@ -47,8 +48,8 @@ def convert_object_ids_to_str(data):
 
 
 def simulateBus(id):
-    collection = database['vehicles']
-    vehicle = collection.find_one({'_id': ObjectId(id)})
+    vehicle_col = database['vehicles']
+    vehicle = get_vehicle({'_id': ObjectId(id)})
     returnObject = {}
 
     if not vehicle:
@@ -57,7 +58,12 @@ def simulateBus(id):
     if not vehicle['route']:
         return {'detail': 'Vehicle has no route'}
 
-    lines = vehicle['route']['lines']
+    route = get_route({'_id': ObjectId(vehicle['route']['_id'])})
+
+    if not route:
+        return {'detail': 'Route record not found'}
+
+    lines = route['lines']
     vehicle_id = str(vehicle['_id'])
 
     returnObject = vehicle
