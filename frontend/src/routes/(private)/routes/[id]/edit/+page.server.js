@@ -50,6 +50,7 @@ export const actions = {
     let description = formData.get("description");
 
     let coordinates = JSON.parse(formData.get("coordinates"));
+    let coordinates_visual = JSON.parse(formData.get("coordinates_visual"));
     let lines = JSON.parse(formData.get("lines"));
     let hotspots = JSON.parse(formData.get("hotspots"));
 
@@ -57,7 +58,7 @@ export const actions = {
 
     try {
       const res = await api.put(`/routes/${_id}`, token, fetch, {
-        body: { name, lines, description, coordinates, hotspots },
+        body: { name, lines, description, coordinates, hotspots, coordinates_visual },
       });
 
       let data = await res.json();

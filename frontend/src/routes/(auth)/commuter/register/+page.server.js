@@ -1,13 +1,9 @@
 
-
-import { fail, redirect } from "@sveltejs/kit";
-import { showSpinner } from "$lib/store/spinner";
 import api from "$lib/api/api";
-import { v4 as uuidv4 } from "uuid";
 
 export const actions = {
   register: async (event) => {
-    const { request, cookies, locals, fetch } = event;
+    const { request, cookies, fetch } = event;
 
     const formData = await request.formData();
 
@@ -25,21 +21,11 @@ export const actions = {
           last_name,
           email,
           password,
-          role: "student",
+          role: "commuter",
         },
       });
 
       let data = await res.json();
-
-      let userData;
-
-      if ("token" in data)
-        userData = {
-          username: email,
-          role: role,
-          token: data.token,
-        };
-
       return data;
     } catch (error) {
       console.log(error);

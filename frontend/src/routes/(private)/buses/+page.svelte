@@ -30,10 +30,17 @@
   import TableFrame from "$components/Base/Table/TableFrame.svelte";
   import Pagination from "$components/Base/Table/Components/Pagination.svelte";
   import { authStore, isAdmin, isCommuter, isManager } from "$lib/store/auth";
+  import { digitizeNumber } from "$components/utils/textMethods.js";
+  import Tab from "$components/Base/Tab/Tab.svelte";
+  import TabHeader from "$components/Base/Tab/TabHeader.svelte";
+  import TabHeaders from "$components/Base/Tab/TabHeaders.svelte";
+  import TabPanel from "$components/Base/Tab/TabPanel.svelte";
+  import { onMount } from "svelte";
 
   export let data;
 
   $: buses = data?.vehicles;
+  $: reservations = data?.reservations?.data || [];
 
   let busCreateForm = {
     name: undefined,
@@ -48,9 +55,21 @@
   let createModal;
   let editModal;
 
+  let reservationMap = {};
+
   function selectItem(item) {
     selectedBus = item;
     selectedBusRef = JSON.parse(JSON.stringify(item));
+  }
+
+  function formatTime(time) {
+    if (!time) return;
+
+    let str = time.split(":");
+
+    let timeStr = str[0] + ":" + digitizeNumber(str[1]) + " " + str[2];
+
+    return timeStr;
   }
 
   async function create() {
@@ -130,6 +149,12 @@
     showToaster("Bus updated");
     await invalidateAll();
   }
+
+  onMount(() => {
+    reservations?.forEach((elm, idx) => {
+      reservationMap[idx] = elm.name;
+    });
+  });
 </script>
 
 <Section class="flex flex-col gap-0 h-full">
@@ -145,110 +170,141 @@
     </div>
   </TableHeader>
 
-  <Table>
-    <TableFrame>
-      <TableBody>
-        <TableHeaderRow>
-          <TableBodyHeader class="col-span-1">Name</TableBodyHeader>
-          <TableBodyHeader class="col-span-1">License</TableBodyHeader>
-          <TableBodyHeader class="col-span-1">Driver</TableBodyHeader>
-          {#if isCommuter($authStore)}
-            <TableBodyHeader class="col-span-1">Reservation</TableBodyHeader>
-            <TableBodyHeader class="col-span-1">Time</TableBodyHeader>
-          {/if}
-          <TableBodyHeader class="col-span-1">Status</TableBodyHeader>
-          <TableBodyHeader class="col-span-1"></TableBodyHeader>
-        </TableHeaderRow>
-
-        {#each buses?.data || [] as item}
-          <TableRow
-            onClick={() => {
-              if (isAdmin($authStore) || isManager($authStore))
-                goto(`/buses/${item._id}`);
-            }}
-            class="items-center hover:cursor-pointer hover:bg-gray-100"
-          >
-            <TableCell
-              class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-              >{item.name}</TableCell
-            >
-            <TableCell
-              class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-              >{item.license}</TableCell
-            >
-            <TableCell
-              class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-              >{item.driver?.first_name || "Not assigned"}</TableCell
-            >
-            {#if isCommuter($authStore)}
-              <TableCell
-                class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-                >{item.reservation?.name || "Not assigned"}</TableCell
-              >
-              <TableCell
-                class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-                >{item.time || "Not assigned"}</TableCell
-              >
-            {/if}
-
-            <TableCell
-              class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
-              >{item.status ?? "Stopped"}</TableCell
-            >
-
-            <TableCell
-              class="col-span-1 flex justify-end gap-3 font-normal text-sm text-[#475467]"
-            >
-              {#if item.route}
-                <TableButton
-                  onClick={(e) => {
-                    goto(`/live/${item._id}`);
-                    e.stopPropagation();
-                  }}><IconLiveView /></TableButton
-                >
-              {/if}
-
-              {#if isAdmin($authStore) || isManager($authStore)}
-                <TableButton
-                  onClick={(e) => {
-                    selectItem(item);
-                    editModal.show();
-                    e.stopPropagation();
-                  }}><IconEdit /></TableButton
-                >
-                <TableButton
-                  onClick={async (e) => {
-                    e.stopPropagation();
-
-                    let form = new FormData();
-
-                    form.append("_id", item._id);
-
-                    const response = await fetch(`?/delete`, {
-                      method: "POST",
-                      body: form,
-                    });
-
-                    const data = deserialize(await response.text());
-
-                    if (!validateApiResponse(data)) {
-                      return;
-                    }
-
-                    showToaster("Bus deleted");
-                    await invalidateAll();
-                  }}><IconTrash /></TableButton
-                >
-              {/if}
-            </TableCell>
-          </TableRow>
+  <Tab invokeLoadOnTabChange={true}>
+    {#if reservations?.length > 0}
+      <TabHeaders>
+        <TabHeader>All</TabHeader>
+        {#each reservations as reservation}
+          <TabHeader value={reservation._id}>{reservation.name}</TabHeader>
         {/each}
-      </TableBody>
-    </TableFrame>
-    <TableFooter>
-      <Pagination totalItems={buses?.total || 0} onPageChange={() => {}} />
-    </TableFooter>
-  </Table>
+      </TabHeaders>
+    {/if}
+
+    {#each [...reservations, ""] as reservation}
+      <TabPanel>
+        <Table>
+          <TableFrame>
+            <TableBody>
+              <TableHeaderRow>
+                <TableBodyHeader class="col-span-1">Name</TableBodyHeader>
+                {#if isAdmin($authStore) || isManager($authStore)}
+                  <TableBodyHeader class="col-span-1">License</TableBodyHeader>
+                  <TableBodyHeader class="col-span-1">Driver</TableBodyHeader>
+                {/if}
+
+                <TableBodyHeader class="col-span-1">Reservation</TableBodyHeader
+                >
+                <TableBodyHeader class="col-span-1">Time</TableBodyHeader>
+
+                <TableBodyHeader class="col-span-1">Status</TableBodyHeader>
+                {#if isCommuter($authStore)}
+                  <TableBodyHeader class="col-span-1">Route</TableBodyHeader>
+                {/if}
+                <TableBodyHeader class="col-span-1"></TableBodyHeader>
+              </TableHeaderRow>
+
+              {#each buses?.data || [] as item}
+                <TableRow
+                  onClick={() => {
+                    if (isAdmin($authStore) || isManager($authStore))
+                      goto(`/buses/${item._id}`);
+                  }}
+                  class="items-center hover:cursor-pointer hover:bg-gray-100"
+                >
+                  <TableCell
+                    class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
+                    >{item.name}</TableCell
+                  >
+                  {#if isAdmin($authStore) || isManager($authStore)}
+                    <TableCell
+                      class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
+                      >{item.license}</TableCell
+                    >
+                    <TableCell
+                      class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
+                      >{item.driver?.first_name || "Not assigned"}</TableCell
+                    >
+                  {/if}
+
+                  <TableCell
+                    class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
+                    >{item.reservation?.name || "Not assigned"}</TableCell
+                  >
+                  <TableCell
+                    class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
+                    >{formatTime(item.time) || "Not assigned"}</TableCell
+                  >
+
+                  <TableCell
+                    class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
+                    >{item.status ?? "Stopped"}</TableCell
+                  >
+
+                  {#if isCommuter($authStore)}
+                    <TableBodyHeader class="col-span-1">
+                      {item.route?.name || "Not assigned"}
+                    </TableBodyHeader>
+                  {/if}
+
+                  <TableCell
+                    class="col-span-1 flex justify-end gap-3 font-normal text-sm text-[#475467]"
+                  >
+                    {#if item.route}
+                      <TableButton
+                        onClick={(e) => {
+                          goto(`/live/${item._id}`);
+                          e.stopPropagation();
+                        }}><IconLiveView /></TableButton
+                      >
+                    {/if}
+
+                    {#if isAdmin($authStore) || isManager($authStore)}
+                      <TableButton
+                        onClick={(e) => {
+                          selectItem(item);
+                          editModal.show();
+                          e.stopPropagation();
+                        }}><IconEdit /></TableButton
+                      >
+                      <TableButton
+                        onClick={async (e) => {
+                          e.stopPropagation();
+
+                          let form = new FormData();
+
+                          form.append("_id", item._id);
+
+                          const response = await fetch(`?/delete`, {
+                            method: "POST",
+                            body: form,
+                          });
+
+                          const data = deserialize(await response.text());
+
+                          if (!validateApiResponse(data)) {
+                            return;
+                          }
+
+                          showToaster("Bus deleted");
+                          await invalidateAll();
+                        }}><IconTrash /></TableButton
+                      >
+                    {/if}
+                  </TableCell>
+                </TableRow>
+              {/each}
+            </TableBody>
+          </TableFrame>
+          <TableFooter>
+            <Pagination
+              totalItems={buses?.total || 0}
+              onPageChange={() => {}}
+            />
+          </TableFooter>
+        </Table>
+      </TabPanel>
+    {/each}
+  </Tab>
 </Section>
 
 <Modal bind:this={createModal}>

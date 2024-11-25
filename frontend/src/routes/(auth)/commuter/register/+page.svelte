@@ -44,10 +44,10 @@
     <Form
       formActionSuccess={() => {
         showToaster("Successfully registered!");
-        goto("/student/login");
+        goto("/commuter/login");
       }}
       {error}
-      action="/student/register?/register"
+      action="/commuter/register?/register"
       class="grid gap-6 w-full"
     >
       <div class="flex items-start gap-4">

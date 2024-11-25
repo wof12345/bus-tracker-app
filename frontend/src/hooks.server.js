@@ -51,8 +51,6 @@ export const handle = async ({ event, resolve }) => {
 
         let data = await res.json();
 
-        console.log(data);
-
         if (!validateApiResponse(data)) return null;
         // if (!validateApiResponse(data)) return dummy
 

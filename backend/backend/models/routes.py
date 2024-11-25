@@ -9,6 +9,7 @@ class RouteCreate(BaseModel):
     name: str
     description: Optional[str] = None
     coordinates: list[list[float]]
+    coordinates_visual: list[list[list[float]]]
     lines: list[list[float]]
     hotspots: list[Hotspot]
 
@@ -18,6 +19,7 @@ class RouteUpdate(BaseModel):
     description: Optional[str] = None
     lines: list[list[float]]
     coordinates: list[list[float]]
+    coordinates_visual: list[list[list[float]]]
     hotspots: list[Hotspot]
 
 
@@ -27,6 +29,7 @@ class Route(BaseModel):
     description: Optional[str] = None
     lines: list[list[float]]
     coordinates: list[list[float]]
+    coordinates_visual: list[list[list[float]]]
     hotspots: list[Hotspot]
 
     class Config:

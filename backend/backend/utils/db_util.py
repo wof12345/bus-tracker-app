@@ -36,9 +36,10 @@ def populate_array_ref(original_list, ref_col, key):
     ref_col = database[ref_col]
 
     for record in original_list:
-        ref = ref_col.find_one({'_id': ObjectId(record[key]['_id'])})
+        if record[key]:
+            ref = ref_col.find_one({'_id': ObjectId(record[key]['_id'])})
 
-        record[key] = ref
+            record[key] = ref
 
     return original_list
 
@@ -46,8 +47,9 @@ def populate_array_ref(original_list, ref_col, key):
 def populate_ref(original_record, ref_col, key):
     ref_col = database[ref_col]
 
-    ref = ref_col.find_one({'_id': ObjectId(original_record[key]['_id'])})
+    if original_record[key]:
+        ref = ref_col.find_one({'_id': ObjectId(original_record[key]['_id'])})
 
-    original_record[key] = ref
+        original_record[key] = ref
 
     return original_record

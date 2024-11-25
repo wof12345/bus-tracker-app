@@ -8,12 +8,20 @@ from backend.models.user import RoleEnum
 collection = database['users']
 
 
-def register_user(email: str, password: str, role: RoleEnum):
+def register_user(
+    email: str,
+    password: str,
+    role: RoleEnum,
+    first_name: str,
+    last_name: str,
+):
     try:
         hashed_password = hash_password(password)
         new_user = {
             'email': email,
             'password': hashed_password,
+            'first_name': first_name,
+            'last_name': last_name,
             'is_verified': False,
             'role': role,
         }

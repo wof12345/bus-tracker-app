@@ -51,7 +51,7 @@
     <div
       transition:scale={{ duration: 250 }}
       class={twMerge(
-        "relative z-40 flex h-max w-max flex-col overflow-hidden rounded-lg bg-white",
+        "relative z-[202] flex h-max w-max flex-col overflow-hidden rounded-lg bg-white",
         $$props.class,
       )}
       on:mouseenter={handleMouseEnter}

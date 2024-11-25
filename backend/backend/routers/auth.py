@@ -10,7 +10,9 @@ router = APIRouter()
 
 @router.post('/register/', response_model=dict)
 def register(user: UserRegisterSchema):
-    return register_user(user.email, user.password, user.role)
+    return register_user(
+        user.email, user.password, user.role, user.first_name, user.last_name
+    )
 
 
 @router.post('/login/', response_model=TokenResponse)

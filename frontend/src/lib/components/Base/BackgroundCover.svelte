@@ -11,7 +11,7 @@
   transition:fade
   class={twMerge(
     `${visible ? "flex" : "hidden"} fixed left-0 top-0
-		z-30 h-screen
+		z-[200] h-screen
 		w-screen bg-[#000000a5]  bg-opacity-100`,
     $$props.class,
   )}

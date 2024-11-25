@@ -1,4 +1,5 @@
 <script lang="ts">
+  import HamBurger from "./HamBurger.svelte";
   import { page } from "$app/stores";
   import IconButton from "../Base/Buttons/IconButton.svelte";
   import Logo from "./Logo.svelte";
@@ -130,7 +131,7 @@
 {#if visible === true || visible === undefined}
   <BackgroundCover class="md:hidden" {hide} {visible}></BackgroundCover>
   <IconButton
-    class="fixed right-3 top-5 z-[60] w-9 p-2 text-black md:hidden"
+    class="fixed right-3 top-5 z-[201] w-9 p-2 text-white md:hidden"
     on:click={() => hide()}
   >
     <IconX />
@@ -138,7 +139,7 @@
 
   <div
     transition:fly={{ x: -200 }}
-    class="fixed left-0 top-0 z-50 {visible === true
+    class="fixed left-0 top-0 z-[500] {visible === true
       ? 'flex'
       : 'hidden'} max-h-screen min-h-screen md:sticky md:flex"
   >
@@ -276,10 +277,10 @@
 {/if}
 
 {#if visible == false}
-  <div class="bg-brand-700 mt-0 flex items-center justify-between px-4 py-3">
+  <div class="bg-primary-700 mt-0 flex items-center justify-between px-4 py-3">
     <Logo alt="false" />
     <IconButton on:click={() => show()}>
-      <img class="flex justify-end" src="/ThreeBar.svg" alt="" /></IconButton
+      <HamBurger /></IconButton
     >
   </div>
 {/if}

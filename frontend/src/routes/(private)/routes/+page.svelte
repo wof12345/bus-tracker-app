@@ -16,7 +16,12 @@
   import { validateApiResponse } from "$components/utils/validateApiResponse";
   import { deserialize } from "$app/forms";
   import TableButton from "$components/Base/Table/Components/TableButton.svelte";
-  import { IconTrash, IconEdit, IconEye } from "@tabler/icons-svelte";
+  import {
+    IconTrash,
+    IconEdit,
+    IconEye,
+    IconArrowRight,
+  } from "@tabler/icons-svelte";
   import Section from "$components/Base/Layout/Section.svelte";
   import TableHeader from "$components/Tables/Components/TableHeader.svelte";
 
@@ -84,15 +89,14 @@
               >{item.description}</TableCell
             >
             <TableCell
-              class="col-span-1 flex gap-1.5 font-normal text-sm text-[#475467]"
+              class="col-span-1 flex gap-1.5 flex-wrap h-max font-normal text-sm text-[#475467]"
             >
               {#each item.hotspots as hotspot, idx (idx)}
-                {#if idx <= 2}
-                  <Badge class="bg-primary-500 text-white">
-                    {hotspot.name}
-                  </Badge>
-                {:else}
-                  .
+                <Badge class="bg-primary-500 text-white">
+                  {hotspot.name}
+                </Badge>
+                {#if idx < item.hotspots.length - 1}
+                  <IconArrowRight size={10} />
                 {/if}
               {/each}
             </TableCell>

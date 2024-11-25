@@ -21,6 +21,21 @@ def update_vehicle(update_data, id):
     return updated_vehicle
 
 
+def get_vehicles(skip=0, limit=100000, reservation=None):
+    query = {}
+    if reservation:
+        query['reservation._id'] = ObjectId(reservation)
+
+    vehicles = list(collection.find(query).skip(skip).limit(limit))
+
+    vehicles = populate_array_ref(vehicles, 'users', 'driver')
+    vehicles = populate_array_ref(vehicles, 'users', 'helper')
+    vehicles = populate_array_ref(vehicles, 'routes', 'route')
+    vehicles = populate_array_ref(vehicles, 'reservations', 'reservation')
+
+    return vehicles
+
+
 def get_vehicle(filters):
     vehicle = collection.find_one(filters)
 

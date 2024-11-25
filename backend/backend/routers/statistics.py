@@ -10,6 +10,7 @@ from bson import ObjectId
 from backend.database import database
 from backend.utils.validate_object_id import validate_object_id
 from backend.utils.pagination import get_pagination_data
+from backend.services.vehicles import get_vehicles
 
 router = APIRouter()
 
@@ -22,7 +23,7 @@ def get_all_reservations():
     total = 0
     unreserved = 0
 
-    vehicles = list(collection.find())
+    vehicles = get_vehicles()
 
     for vehicle in vehicles:
         total += 1

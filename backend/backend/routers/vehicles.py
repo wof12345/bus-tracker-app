@@ -8,7 +8,7 @@ from backend.models.vehicle import (
     AllVehicleResponse,
     VehicleUpdate,
 )
-from backend.services.vehicles import update_vehicle, get_vehicle
+from backend.services.vehicles import update_vehicle, get_vehicle, get_vehicles
 from bson import ObjectId
 from pymongo import ReturnDocument
 from backend.utils.db_util import (
@@ -17,6 +17,7 @@ from backend.utils.db_util import (
     populate_single_ref_array,
     populate_array_ref,
 )
+from typing import Optional
 
 
 router = APIRouter()
@@ -38,15 +39,13 @@ def create_vehicle(item: VehicleCreate):
 
 
 @router.get('/', response_model=AllVehicleResponse)
-def get_all_vehicles(page: int = 1, per_page: int = 10):
+def get_all_vehicles(
+    page: int = 1, per_page: int = 10, reservation: Optional[str] = ''
+):
     skip, limit = get_pagination_data(page, per_page)
     total = collection.count_documents({})
-    vehicles = list(collection.find().skip(skip).limit(limit))
 
-    vehicles = populate_array_ref(vehicles, 'users', 'driver')
-    vehicles = populate_array_ref(vehicles, 'users', 'helper')
-    vehicles = populate_array_ref(vehicles, 'routes', 'route')
-    vehicles = populate_array_ref(vehicles, 'reservations', 'reservation')
+    vehicles = get_vehicles(skip, limit, reservation)
 
     return {
         'total': total,

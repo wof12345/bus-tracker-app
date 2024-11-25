@@ -37,7 +37,7 @@
     };
 
     try {
-      map.setView(coordinates);
+      // map.setView(coordinates);
 
       if (markers[id]) {
         markers[id].setLatLng(coordinates);
@@ -66,7 +66,7 @@
   }
 
   function drawRoutes(vehicle) {
-    let route = vehicle.route.lines;
+    let routes = vehicle.route.coordinates_visual;
     let id = vehicle._id;
 
     const customOptions = {
@@ -75,19 +75,22 @@
     };
 
     if (!lines[id]) {
-      let line = L.polyline(route, {
-        color: "blue",
-        weight: 4,
-      })
-        .addTo(map)
-        .bindPopup(popupRef, customOptions);
+      for (let route of routes) {
+        let line = L.polyline(route, {
+          color: "blue",
+          weight: 4,
+        })
+          .addTo(map)
+          .bindPopup(popupRef, customOptions);
 
-      line.on("click", function (e) {
-        selected.vehicle = vehicle;
-        selected = selected;
-      });
+        line.on("click", function (e) {
+          selected.vehicle = vehicle;
+          selected = selected;
+        });
 
-      lines[id] = line;
+        lines[id] ??= [];
+        lines[id].push(line);
+      }
     }
   }
 

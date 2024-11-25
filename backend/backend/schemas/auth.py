@@ -6,6 +6,8 @@ class UserRegisterSchema(BaseModel):
     email: EmailStr
     role: RoleEnum
     password: str
+    first_name: str
+    last_name: str
 
 
 class UserLoginSchema(BaseModel):

@@ -40,6 +40,7 @@
   let mapLines = [];
 
   let totalLine = [];
+  let totalLineVisual = [];
 
   let marker;
 
@@ -61,13 +62,16 @@
     });
 
     totalLine = route.lines;
+    totalLineVisual = route.coordinates_visual;
 
-    let line = L.polyline(totalLine, {
-      color: "blue",
-      weight: 4,
-    }).addTo(map);
+    totalLineVisual.forEach((elm) => {
+      let line = L.polyline(elm, {
+        color: "blue",
+        weight: 4,
+      }).addTo(map);
 
-    mapData.push(line);
+      mapData.push(line);
+    });
   }
 
   function convertToORSFormat(leafletCoords) {
@@ -93,6 +97,7 @@
     form.append("name", routeForm.name);
     form.append("description", routeForm.description);
     form.append("coordinates", JSON.stringify(routeForm.coordinates));
+    form.append("coordinates_visual", JSON.stringify(totalLineVisual));
     form.append("lines", JSON.stringify(routeForm.lines));
     form.append(
       "hotspots",
@@ -153,6 +158,7 @@
 
   async function drawOnMap(array, callDraw = true) {
     totalLine = [];
+    totalLineVisual = [];
 
     mapData.forEach((layer) => {
       map.removeLayer(layer);
@@ -210,19 +216,24 @@
     try {
       const route = await getORSRoute(start, end);
 
-      mapLines.forEach((layer) => {
-        map.removeLayer(layer);
+      const uniqueCoordinates = new Set(
+        totalLine.map((coord) => coord.join(",")),
+      );
+
+      route.forEach((coord) => {
+        const coordStr = coord.join(",");
+        if (!uniqueCoordinates.has(coordStr)) {
+          uniqueCoordinates.add(coordStr);
+          totalLine.push(coord);
+        }
       });
-      mapLines = [];
 
-      totalLine.push(...route);
-      // totalLine.pop();
-
-      let line = L.polyline(totalLine, {
+      let line = L.polyline(route, {
         color: "blue",
         weight: 4,
       }).addTo(map);
 
+      totalLineVisual.push(route);
       mapLines.push(line);
       mapLines = mapLines;
     } catch (error) {
@@ -312,8 +323,8 @@
   });
 </script>
 
-<div class="flex flex-row h-full">
-  <div class="w-full relative">
+<div class="flex flex-col md:flex-row h-max">
+  <div class="w-full h-[200px] relative">
     <div
       class="search_anchor absolute top-10 m-auto left-0 right-0 z-[100] max-w-[300px]"
     >
@@ -340,7 +351,7 @@
   </div>
 
   <div
-    class="bg-white rounded-md flex flex-col p-4 gap-4 h-screen overflow-auto"
+    class="bg-white rounded-md flex flex-col p-4 w-full lg:max-w-[400px] gap-4 relative z-1 h-screen overflow-y-auto"
   >
     <div class="flex justify-between gap-3">
       <Button
@@ -375,9 +386,7 @@
       </InputGroup>
     {/if}
 
-    <div
-      class="h-max bg-gray-50 min-w-[500px] max-w-[500px] flex flex-wrap gap-2 items-center"
-    >
+    <div class="h-max bg-gray-50 flex flex-wrap gap-2 items-center">
       {#each selectedHotspots as hotspot, idx}
         <button
           on:click={() => {

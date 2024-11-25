@@ -9,6 +9,7 @@
   export const id = uuidv4();
   export let active = 0;
   export let onTabChange = () => {};
+  export let invokeLoadOnTabChange = false;
 
   let clickEventAdded = false;
 
@@ -28,6 +29,7 @@
 
     tabHeaders?.forEach((elm, idx) => {
       elm.id = `tab-header-${id}_${idx}`;
+      let value = elm.dataset["value"];
 
       if (active === idx) {
         elm.classList.add("tab-active");
@@ -40,7 +42,7 @@
         clickEventAdded = true;
 
         if (active == idx) {
-          updateURL(idx);
+          updateURL(value ?? idx);
 
           tabPanels[idx].classList.remove("hidden");
           tabHeaders[idx].classList.remove("tab-inactive");
@@ -64,7 +66,11 @@
 
   function updateURL(tabValue) {
     let newUrl = addSeachParamToURL({ key: "tab", value: tabValue });
-    pushState(newUrl, {});
+    if (invokeLoadOnTabChange) {
+      goto(newUrl, { keepFocus: true });
+    } else {
+      pushState(newUrl, {});
+    }
   }
 
   onMount(() => {

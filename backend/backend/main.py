@@ -113,7 +113,7 @@ app.include_router(
     reservations.router,
     tags=['reservations'],
     prefix='/reservations',
-    dependencies=[Depends(role_required([RoleEnum.ADMIN]))],
+    dependencies=[Depends(auth_scheme)],
 )
 
 
