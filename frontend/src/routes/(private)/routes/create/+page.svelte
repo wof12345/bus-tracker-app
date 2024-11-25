@@ -190,18 +190,18 @@
     try {
       const route = await getORSRoute(start, end);
 
-      const uniqueCoordinates = new Set(
-        totalLine.map((coord) => coord.join(",")),
-      );
+      // const uniqueCoordinates = new Set(
+      //   totalLine.map((coord) => coord.join(",")),
+      // );
 
-      route.forEach((coord) => {
-        const coordStr = coord.join(",");
-        if (!uniqueCoordinates.has(coordStr)) {
-          uniqueCoordinates.add(coordStr);
-          totalLine.push(coord);
-        }
-      });
-
+      // route.forEach((coord) => {
+      //   const coordStr = coord.join(",");
+      //   if (!uniqueCoordinates.has(coordStr)) {
+      //     uniqueCoordinates.add(coordStr);
+      //     totalLine.push(coord);
+      //   }
+      // });
+      totalLine.push(...route);
       totalLine = totalLine;
 
       let line = L.polyline(route, {

@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from fastapi import APIRouter, File, UploadFile, HTTPException
 from typing import Optional
 from backend.services.license_detection import update_vehicle_based_on_plate
+from backend.models.vehicle import Vehicle
 
 
 router = APIRouter()
@@ -16,7 +17,7 @@ VIDEO_MIME_TYPES = {
 }
 
 
-@router.post('/extract-license-plates')
+@router.post('/extract-license-plates', response_model=list[Vehicle])
 def extract_license_plates(
     file: UploadFile = File(...),
     generate_csv: Optional[bool] = True,
@@ -43,6 +44,6 @@ def extract_license_plates(
         show_video_simulation=show_video_simulation,
     )
 
-    update_vehicle_based_on_plate(plates)
+    vehicle_with_plates = update_vehicle_based_on_plate(plates)
 
-    return plates
+    return vehicle_with_plates

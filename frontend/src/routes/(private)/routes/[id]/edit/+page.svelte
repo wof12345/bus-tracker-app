@@ -64,11 +64,21 @@
     totalLine = route.lines;
     totalLineVisual = route.coordinates_visual;
 
-    totalLineVisual.forEach((elm) => {
-      let line = L.polyline(elm, {
-        color: "blue",
-        weight: 4,
-      }).addTo(map);
+    totalLineVisual.forEach((elm, idx) => {
+      let line;
+
+      if (idx === -1)
+        line = L.polyline(elm, {
+          color: "red",
+          weight: 4,
+        })
+          .addTo(map)
+          .bindPopup("Starting route");
+      else
+        line = L.polyline(elm, {
+          color: "blue",
+          weight: 4,
+        }).addTo(map);
 
       mapData.push(line);
     });
@@ -144,14 +154,27 @@
     drawOnMap(selectedHotspots, callDraw);
   }
 
-  function addMarker(coordinates) {
-    const customOptions = {
-      maxWidth: "800",
-      className: "custom",
-    };
+  function addMarker(coordinates, idx) {
+    var redMarker = leaflet?.icon({
+      iconUrl: "/red-marker.png",
+      shadowUrl: "",
 
-    let marker = leaflet?.marker(coordinates).addTo(map);
-    // .bindPopup(popupRef, customOptions);
+      iconSize: [40, 40],
+      shadowSize: [50, 64],
+      iconAnchor: [18, 45],
+      shadowAnchor: [4, 62],
+      popupAnchor: [3, -30],
+    });
+
+    let marker;
+
+    if (idx === 0) {
+      console.log(idx);
+      marker = leaflet
+        ?.marker(coordinates, { icon: redMarker })
+        .addTo(map)
+        .bindPopup("Starting point");
+    } else marker = leaflet?.marker(coordinates).addTo(map);
 
     mapData.push(marker);
   }
@@ -168,7 +191,7 @@
     let promisesToResolve = [];
 
     array.forEach((elm, idx) => {
-      addMarker(elm.coordinates);
+      addMarker(elm.coordinates, idx);
       map.setView(elm.coordinates);
 
       mapLines.forEach((layer) => {
@@ -216,17 +239,18 @@
     try {
       const route = await getORSRoute(start, end);
 
-      const uniqueCoordinates = new Set(
-        totalLine.map((coord) => coord.join(",")),
-      );
+      // const uniqueCoordinates = new Set(
+      //   totalLine.map((coord) => coord.join(",")),
+      // );
 
-      route.forEach((coord) => {
-        const coordStr = coord.join(",");
-        if (!uniqueCoordinates.has(coordStr)) {
-          uniqueCoordinates.add(coordStr);
-          totalLine.push(coord);
-        }
-      });
+      // route.forEach((coord) => {
+      //   const coordStr = coord.join(",");
+      //   if (!uniqueCoordinates.has(coordStr)) {
+      //     uniqueCoordinates.add(coordStr);
+      //     totalLine.push(coord);
+      //   }
+      // });
+      totalLine.push(...route);
 
       let line = L.polyline(route, {
         color: "blue",
@@ -357,7 +381,7 @@
       <Button
         class="w-max"
         onClick={() => {
-          goto("/routes");
+          history.back();
         }}><IconArrowLeft size={18} /> Back</Button
       >
       {#if isAdmin($authStore) || isManager($authStore)}

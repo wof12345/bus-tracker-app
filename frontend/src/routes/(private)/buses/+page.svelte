@@ -242,7 +242,15 @@
 
                   {#if isCommuter($authStore)}
                     <TableBodyHeader class="col-span-1">
-                      {item.route?.name || "Not assigned"}
+                      <Button
+                        class="p-0 px-2 text-xs w-max rounded-xl"
+                        onClick={() => {
+                          if (item.route?._id)
+                            goto(`/routes/${item.route?._id}/edit`);
+                        }}
+                      >
+                        {item.route?.name || "Not assigned"}
+                      </Button>
                     </TableBodyHeader>
                   {/if}
 

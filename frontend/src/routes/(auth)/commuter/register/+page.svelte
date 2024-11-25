@@ -98,7 +98,7 @@
       <Button type="submit">Get Started</Button>
       <div class="flex justify-center gap-1">
         <Paragraph class="text-[#475467]">Already have an account?</Paragraph>
-        <a href="/student/login">
+        <a href="/commuter/login">
           <Paragraph class="font-semibold text-[#6941C6]">Log in</Paragraph>
         </a>
       </div>

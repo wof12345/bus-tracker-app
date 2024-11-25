@@ -5,6 +5,11 @@
     "icon": "home.svg"
   },
   {
+    "name": "Camera",
+    "href": "/camera",
+    "icon": "camera.svg"
+  },
+  {
     "name": "Hotspots",
     "href": "/hotspots",
     "icon": "hotspot.svg"

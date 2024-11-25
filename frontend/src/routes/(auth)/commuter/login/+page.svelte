@@ -85,12 +85,12 @@
           />
         </div>
 
-        <Text class="text-center text-sm font-normal text-gray-600 ">
+        <!-- <Text class="text-center text-sm font-normal text-gray-600 ">
           Forgot your password?
           <a href="/forgot-password">
             <span class=" font-semibold text-[#6941C6]">Reset password</span>
           </a>
-        </Text>
+        </Text> -->
 
         <Button type="submit">Sign in</Button>
       </div>
@@ -105,7 +105,7 @@
         </a>
       </div>
 
-      <div class="footer-text">
+      <!-- <div class="footer-text">
         <Paragraph class="text-gray-600">Not a commuter?</Paragraph>
 
         <a href="/driver/login">
@@ -113,7 +113,7 @@
             Login as a driver</Paragraph
           >
         </a>
-      </div>
+      </div> -->
     </div>
   </div>
 </div>
