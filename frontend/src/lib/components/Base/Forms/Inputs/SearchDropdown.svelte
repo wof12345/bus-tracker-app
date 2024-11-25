@@ -40,10 +40,12 @@
       return;
     }
 
+    keyword = keyword?.view_name || keyword?.name || keyword;
+
     filteredOptions = $$props.options.filter((elm: any) =>
       (elm.view_name || elm.name || elm)
         .toLowerCase()
-        .includes(keyword.toLowerCase()),
+        .includes(keyword?.toLowerCase()),
     );
   }
 
