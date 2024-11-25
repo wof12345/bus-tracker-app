@@ -99,7 +99,9 @@ async def broadCastLiveData(vehicle_id):
     try:
         vehicle = simulateBus(vehicle_id)
 
-        for client in clients:
+        print(active_client_sessions)
+
+        for client in active_client_sessions[vehicle_id]:
             await client.send_text(json.dumps(vehicle))
 
     except Exception as e:
@@ -107,6 +109,7 @@ async def broadCastLiveData(vehicle_id):
 
 
 def call_async_broadCastLiveData(vehicle_id):
+    # print(timer)
     run(broadCastLiveData(vehicle_id))
 
 
@@ -136,15 +139,21 @@ async def websocket_endpoint(websocket: WebSocket):
                         'interval',
                         seconds=1,
                         args=[vehicle_id],
+                        max_instances=2,
                     )
                     timer[vehicle_id].start()
 
     except Exception as e:
         print('error', e)
-        print(f"Connection origin: {websocket.headers.get('origin')}")
+        print(
+            f"Connection origin: {websocket.headers.get('origin')}",
+        )
         clients.remove(websocket)
         if vehicle_id in active_client_sessions:
             active_client_sessions[vehicle_id].remove(websocket)
+
             if len(active_client_sessions[vehicle_id]) == 0:
                 timer[vehicle_id].shutdown(wait=False)
+
                 del timer[vehicle_id]
+                del active_client_sessions[vehicle_id]
