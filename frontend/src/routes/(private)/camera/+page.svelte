@@ -12,6 +12,7 @@
   import { validateApiResponse } from "$components/utils/validateApiResponse";
   import { invalidateAll } from "$app/navigation";
   import Header from "$components/Base/Typography/Header.svelte";
+  import Paragraph from "$components/Base/Typography/Paragraph.svelte";
 
   export let data;
 
@@ -81,6 +82,25 @@
         >
         <FileUpload bind:file={urlForm.file} />
       </InputGroup>
+
+      <Paragraph class="text-xs">
+        <span class="font-bold">
+          Pre-trained model for Object Detection <a
+            href="https://docs.ultralytics.com/">YOLOv8</a
+          >. <br />
+          OCR used paddle-ocr with paddle-paddle cpu instance model <br />
+          Current image processing methods to extract license plates from images
+          are :
+        </span>
+
+        <ul style="list-style-type:circle" class="pt-2">
+          <li>CLAHE (Contrast Limited Adaptive Histogram Equalization)</li>
+          <li>Gray scale</li>
+          <li>Otsu Threshold</li>
+          <li>Erosion (Single iteration of 3x3 kernal based)</li>
+          <li>Dilation (Single iteration of 3x3 kernal based)</li>
+        </ul>
+      </Paragraph>
 
       <Button onClick={() => process()} class="w-max">Process</Button>
     </div>
