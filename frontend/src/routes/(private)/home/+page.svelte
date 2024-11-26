@@ -20,19 +20,21 @@
   <TableHeader class="mb-3" title="Home" subtitle="Current app statistics" />
 
   <div class="grid grid-cols-3 gap-3">
-    {#each Object.keys(statistics) as stat}
-      <Card>
-        <Container class="justify-between">
-          <Paragraph class="font-medium md:text-sm">{stat} Bus</Paragraph>
-          <div>
-            <IconHighlight class="text-gray-400" />
-          </div>
-        </Container>
+    {#if statistics}
+      {#each Object.keys(statistics) as stat}
+        <Card>
+          <Container class="justify-between">
+            <Paragraph class="font-medium md:text-sm">{stat} Bus</Paragraph>
+            <div>
+              <IconHighlight class="text-gray-400" />
+            </div>
+          </Container>
 
-        <Header class="flex items-center gap-2 md:text-3xl">
-          <CountingAnimation number={statistics[stat]} />
-        </Header>
-      </Card>
-    {/each}
+          <Header class="flex items-center gap-2 md:text-3xl">
+            <CountingAnimation number={statistics[stat]} />
+          </Header>
+        </Card>
+      {/each}
+    {/if}
   </div>
 </Section>
