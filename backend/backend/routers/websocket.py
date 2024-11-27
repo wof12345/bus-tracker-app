@@ -172,8 +172,8 @@ def getBusData(id):
 
 async def broadCastLiveData(vehicle_id):
     try:
-        # vehicle = simulateBus(vehicle_id)
-        vehicle = getBusData(vehicle_id)
+        vehicle = simulateBus(vehicle_id)
+        # vehicle = getBusData(vehicle_id)
 
         print(active_client_sessions)
 
@@ -194,35 +194,43 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     clients.append(websocket)
 
+    vehicles = []
+
     try:
         while True:
             data = await websocket.receive_text()
 
             data = json.loads(data)
 
-            if '_id' not in data:
+            if 'type' not in data:
                 get_and_update_vehicle(data)
                 return
 
-            vehicle_id = data['_id']
+            vehicles = data['buses']
 
-            if vehicle_id not in active_client_sessions:
-                active_client_sessions[vehicle_id] = []
-                active_client_sessions[vehicle_id].append(websocket)
-            else:
-                active_client_sessions[vehicle_id].append(websocket)
+            for vehicle in vehicles:
+                if '_id' not in vehicle:
+                    return {'detail': 'No details found'}
 
-            if vehicle_id:
-                if vehicle_id not in timer:
-                    timer[vehicle_id] = BackgroundScheduler()
-                    timer[vehicle_id].add_job(
-                        call_async_broadCastLiveData,
-                        'interval',
-                        seconds=1,
-                        args=[vehicle_id],
-                        max_instances=2,
-                    )
-                    timer[vehicle_id].start()
+                vehicle_id = vehicle['_id']
+
+                if vehicle_id not in active_client_sessions:
+                    active_client_sessions[vehicle_id] = []
+                    active_client_sessions[vehicle_id].append(websocket)
+                else:
+                    active_client_sessions[vehicle_id].append(websocket)
+
+                if vehicle_id:
+                    if vehicle_id not in timer:
+                        timer[vehicle_id] = BackgroundScheduler()
+                        timer[vehicle_id].add_job(
+                            call_async_broadCastLiveData,
+                            'interval',
+                            seconds=1,
+                            args=[vehicle_id],
+                            max_instances=2,
+                        )
+                        timer[vehicle_id].start()
 
     except Exception as e:
         print('error', e)
@@ -230,11 +238,17 @@ async def websocket_endpoint(websocket: WebSocket):
             f"Connection origin: {websocket.headers.get('origin')}",
         )
         clients.remove(websocket)
-        if vehicle_id in active_client_sessions:
-            active_client_sessions[vehicle_id].remove(websocket)
+        for vehicle in vehicles:
+            if '_id' not in vehicle:
+                return {'detail': 'No details found'}
 
-            if len(active_client_sessions[vehicle_id]) == 0:
-                timer[vehicle_id].shutdown(wait=False)
+            vehicle_id = vehicle['_id']
 
-                del timer[vehicle_id]
-                del active_client_sessions[vehicle_id]
+            if vehicle_id in active_client_sessions:
+                active_client_sessions[vehicle_id].remove(websocket)
+
+                if len(active_client_sessions[vehicle_id]) == 0:
+                    timer[vehicle_id].shutdown(wait=False)
+
+                    del timer[vehicle_id]
+                    del active_client_sessions[vehicle_id]

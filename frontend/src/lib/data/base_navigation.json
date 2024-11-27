@@ -18,5 +18,10 @@
     "name": "Routes",
     "href": "/routes",
     "icon": "route.svg"
+  },
+  {
+    "name": "Live",
+    "href": "/live",
+    "icon": "live.svg"
   }
 ]

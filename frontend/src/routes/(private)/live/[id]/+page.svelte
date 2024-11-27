@@ -124,7 +124,13 @@
 
     socket.onopen = () => {
       console.log("WebSocket connection established");
-      if (busId) socket.send(JSON.stringify({ _id: busId }));
+      if (busId)
+        socket.send(
+          JSON.stringify({
+            type: "live",
+            buses: [{ _id: busId }],
+          }),
+        );
     };
 
     socket.onmessage = (event) => {
@@ -159,7 +165,7 @@
     >
     <TableHeader
       subtitle={"Live location view"}
-      title={`Live location for bus ${bus?.name || busId}`}
+      title={`Live location for ${bus?.name || busId}`}
     ></TableHeader>
 
     <p class="text-xs">
@@ -169,12 +175,6 @@
       the platform. <br /> The technical idea of it is the same as when using GPS
       as the we would need to send data from GPS to our backend. However the method
       of sending can differ based on the model of the tracking device.
-    </p>
-
-    <p class="text-xs">
-      <span class="text-sm font-bold">Planned (possible feature):</span> <br />
-      The same code can be used to create a tracking interface with all the vehicles
-      for the managers.
     </p>
   </div>
 </div>

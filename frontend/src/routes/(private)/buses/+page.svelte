@@ -241,9 +241,9 @@
                   >
 
                   {#if isCommuter($authStore)}
-                    <TableBodyHeader class="col-span-1">
+                    <TableCell class="col-span-1">
                       <Button
-                        class="p-0 px-2 text-xs w-max rounded-xl"
+                        class="p-0 px-2 text-xs w-max rounded-xl max-w-full"
                         onClick={() => {
                           if (item.route?._id)
                             goto(`/routes/${item.route?._id}/edit`);
@@ -251,7 +251,7 @@
                       >
                         {item.route?.name || "Not assigned"}
                       </Button>
-                    </TableBodyHeader>
+                    </TableCell>
                   {/if}
 
                   <TableCell

@@ -1,10 +1,109 @@
 <script>
-  import { onMount } from "svelte";
+  import { goto } from "$app/navigation";
+  import { page } from "$app/stores";
+  import Button from "$components/Base/Buttons/Button.svelte";
+  import TableHeader from "$components/Tables/Components/TableHeader.svelte";
+  import { showToaster } from "$lib/store/toaster.ts";
+  import { IconArrowLeft } from "@tabler/icons-svelte";
+  import { onDestroy, onMount } from "svelte";
 
   export let data;
 
+  let currentTrackedBuses = {};
+
   let leaflet;
   let map;
+
+  let busId = $page.params.id;
+
+  let bus = {};
+
+  let markers = {};
+  let lines = {};
+  let selected = {
+    route: undefined,
+    vehicle: undefined,
+  };
+
+  let popupRef;
+
+  let socket;
+
+  function addMarkerMap(vehicle) {
+    let coordinates = vehicle.coordinates;
+    let id = vehicle._id;
+
+    const customOptions = {
+      maxWidth: "800",
+      className: "custom",
+    };
+
+    try {
+      // map.setView(coordinates);
+
+      if (markers[id]) {
+        markers[id].setLatLng(coordinates);
+      } else {
+        markers[id] = L.circleMarker([51.5, -0.09], {
+          color: "blue",
+          fillColor: "blue",
+          fillOpacity: 1,
+          radius: 10,
+        })
+          .addTo(map)
+          .bindPopup(popupRef, customOptions);
+      }
+
+      currentTrackedBuses[vehicle._id]["marker"] = markers[id];
+
+      markers[id].on("click", function (e) {
+        selected.vehicle = currentTrackedBuses[vehicle._id];
+        selected = selected;
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function drawVehicle(vehicle) {
+    addMarkerMap(vehicle);
+  }
+
+  function drawRoutes(vehicle) {
+    let routes = vehicle.route.coordinates_visual;
+    let id = vehicle._id;
+
+    const customOptions = {
+      maxWidth: "800",
+      className: "custom",
+    };
+
+    if (!lines[id]) {
+      for (let route of routes) {
+        let line = L.polyline(route, {
+          color: "blue",
+          weight: 4,
+        })
+          .addTo(map)
+          .bindPopup(popupRef, customOptions);
+
+        line.on("click", function (e) {
+          selected.vehicle = currentTrackedBuses[vehicle._id];
+          selected = selected;
+        });
+
+        lines[id] ??= [];
+        lines[id].push(line);
+      }
+    }
+  }
+
+  function drawOnMap(vehicles = []) {
+    for (let vehicle of vehicles) {
+      drawVehicle(vehicle);
+      drawRoutes(vehicle);
+    }
+  }
 
   onMount(async () => {
     leaflet = (await import("leaflet")).default;
@@ -25,21 +124,118 @@
       const { lat, lng } = event.latlng;
     });
 
-    const socket = new WebSocket("ws://localhost:8001/websocket/ws");
-    socket.onmessage = (event) => {
-      const { latitude, longitude } = JSON.parse(event.data);
-      gpsCoordinates.set({ latitude, longitude });
+    socket = new WebSocket("ws://localhost:8001/websocket/ws");
 
-      map.setView([latitude, longitude], 13);
-      marker.setLatLng([latitude, longitude]);
+    socket.onopen = () => {
+      let buses = data.vehicles.data.map((elm) => new Object({ _id: elm._id }));
+
+      console.log("WebSocket connection established");
+      if (buses.length > 0)
+        socket.send(
+          JSON.stringify({
+            type: "live",
+            buses,
+          }),
+        );
     };
+
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+
+        if ("_id" in data && data["coordinates"]) {
+          bus = data;
+
+          currentTrackedBuses[bus["_id"]] = data;
+          drawOnMap([bus]);
+        }
+      } catch (error) {}
+    };
+
+    socket.onclose = function (event) {
+      showToaster("Connection lost to stream");
+      console.log("Socket closed:", event.code, event.reason);
+    };
+  });
+
+  onDestroy(() => {
+    socket?.close(1000, "Client disconnected");
   });
 </script>
 
 <div class="flex flex-row h-full">
   <div id="map"></div>
 
-  <div class="bg-white rounded-md flex flex-col p-4 gap-4"></div>
+  <div class="bg-white rounded-md flex flex-col p-4 gap-4 max-w-[400px]">
+    <Button
+      class="w-max"
+      onClick={() => {
+        history.back();
+      }}><IconArrowLeft size={18} /> Back</Button
+    >
+    <TableHeader
+      subtitle={"Live location view"}
+      title={`Live location for all buses`}
+    ></TableHeader>
+
+    <p class="text-xs">
+      <span class="text-sm font-bold">Disclaimer:</span> <br />
+      This is a proof of concept and a simulation for the time being on how we could
+      use GPS technology to track bus in realtime and reveal them to everyone using
+      the platform. <br /> The technical idea of it is the same as when using GPS
+      as the we would need to send data from GPS to our backend. However the method
+      of sending can differ based on the model of the tracking device.
+    </p>
+
+    <p class="text-xs">
+      <span class="font-bold">Improvement notes</span> <br />
+      Can be color coded for different buses and routes
+    </p>
+
+    <div class="text-xs">
+      <span class="font-bold">Current tracked buses</span>
+
+      <div class="flex flex-col gap-1 justify-start items-start">
+        {#each Object.keys(currentTrackedBuses) as key}
+          <button
+            on:click={() => {
+              selected.vehicle = currentTrackedBuses[key];
+              selected = selected;
+
+              map.setView(currentTrackedBuses[key].coordinates);
+              currentTrackedBuses[key].marker?.openPopup();
+            }}
+            class="p-1 hover:bg-gray-100 w-full text-start"
+          >
+            <p>{currentTrackedBuses[key].name} :</p>
+          </button>
+        {/each}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hidden">
+  <div bind:this={popupRef}>
+    <div class="flex flex-col gap-2">
+      <p style="margin: 0;">
+        <span class="font-semibold text-sm"> Bus name:</span>
+        {selected.vehicle?.name || "Unnamed"}
+      </p>
+      <p style="margin: 0;">
+        <span class="font-semibold text-sm"> Route name:</span>
+        {selected.vehicle?.route.name || "Unnamed"}
+      </p>
+      <p style="margin: 0;">
+        <span class="font-semibold text-sm"> Reserved for:</span>
+        {selected.vehicle?.reservation?.name || ""}
+      </p>
+      <p style="margin: 0;">
+        <span class="font-semibold text-sm"> Current bus coordinates:</span>
+        {selected.vehicle?.coordinates || ""}
+      </p>
+    </div>
+  </div>
 </div>
 
 <style>
