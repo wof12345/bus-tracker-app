@@ -42,13 +42,31 @@
       // map.setView(coordinates);
 
       if (markers[id]) {
-        markers[id].setLatLng(coordinates);
+        markers[id]?.setLatLng(coordinates);
+
+        if (vehicle._id == selected.vehicle?._id) {
+          markers[id]?.setStyle({
+            color: "red",
+            fillColor: "red",
+          });
+          markers[id].options.pane = "highPriorityPaneMarker";
+        } else {
+          markers[id]?.setStyle({
+            color: "blue",
+            fillColor: "blue",
+          });
+          markers[id].options.pane = "lowPriorityPaneMarker";
+        }
       } else {
         markers[id] = L.circleMarker([51.5, -0.09], {
-          color: "blue",
-          fillColor: "blue",
+          color: vehicle._id == selected.vehicle?._id ? "red" : "blue",
+          fillColor: vehicle._id == selected.vehicle?._id ? "red" : "blue",
           fillOpacity: 1,
           radius: 10,
+          pane:
+            vehicle._id == selected.vehicle?._id
+              ? "highPriorityPaneMarker"
+              : "lowPriorityPaneMarker",
         })
           .addTo(map)
           .bindPopup(popupRef, customOptions);
@@ -80,12 +98,27 @@
 
     if (!lines[id]) {
       for (let route of routes) {
-        let line = L.polyline(route, {
-          color: "blue",
-          weight: 4,
-        })
-          .addTo(map)
-          .bindPopup(popupRef, customOptions);
+        let line;
+
+        if (vehicle._id == selected.vehicle?._id) {
+          line = L.polyline(route, {
+            color: "red",
+            weight: 4,
+          })
+            .addTo(map)
+            .bindPopup(popupRef, customOptions);
+
+          line.options.pane = "highPriorityPane";
+        } else {
+          line = L.polyline(route, {
+            color: "blue",
+            weight: 4,
+          })
+            .addTo(map)
+            .bindPopup(popupRef, customOptions);
+
+          line.options.pane = "lowPriorityPane";
+        }
 
         line.on("click", function (e) {
           selected.vehicle = currentTrackedBuses[vehicle._id];
@@ -94,6 +127,28 @@
 
         lines[id] ??= [];
         lines[id].push(line);
+      }
+    } else {
+      for (let line of lines[id]) {
+        if (vehicle._id == selected.vehicle?._id) {
+          line.setStyle({
+            color: "red",
+            fillColor: "red",
+          });
+
+          line.removeFrom(map);
+          line.options.pane = "highPriorityPane";
+          line.addTo(map);
+        } else {
+          line.setStyle({
+            color: "blue",
+            fillColor: "blue",
+          });
+
+          line.removeFrom(map);
+          line.options.pane = "lowPriorityPane";
+          line.addTo(map);
+        }
       }
     }
   }
@@ -123,6 +178,20 @@
     map.on("click", async function (event) {
       const { lat, lng } = event.latlng;
     });
+
+    map.createPane("highPriorityPane");
+    map.getPane("highPriorityPane").style.zIndex = 1000;
+
+    map.createPane("highPriorityPaneMarker");
+    map.getPane("highPriorityPaneMarker").style.zIndex = 1004;
+
+    map.createPane("lowPriorityPane");
+    map.getPane("lowPriorityPane").style.zIndex = 500;
+
+    map.createPane("lowPriorityPaneMarker");
+    map.getPane("lowPriorityPaneMarker").style.zIndex = 501;
+
+    map.getPane("popupPane").style.zIndex = 1005;
 
     socket = new WebSocket("ws://localhost:8001/websocket/ws");
 

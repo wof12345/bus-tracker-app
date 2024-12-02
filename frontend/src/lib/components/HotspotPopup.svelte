@@ -86,7 +86,7 @@
 <div class="hidden">
   <div
     bind:this={popupRef}
-    class="popup flex flex-col gap-2 aspect-auto bg-white"
+    class="popup flex flex-col gap-2 relative aspect-auto bg-white"
   >
     {#if item}
       <p>

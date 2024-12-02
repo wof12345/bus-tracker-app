@@ -257,7 +257,7 @@
                   <TableCell
                     class="col-span-1 flex justify-end gap-3 font-normal text-sm text-[#475467]"
                   >
-                    {#if item.route}
+                    {#if item.route && item.driver}
                       <TableButton
                         onClick={(e) => {
                           goto(`/live/${item._id}`);

@@ -83,12 +83,12 @@
         </div>
       </div>
 
-      <Text class=" text-sm font-normal text-[#475467]">
+      <!-- <Text class=" text-sm font-normal text-[#475467]">
         Forgot your password?
         <a href="/forgot-password">
           <span class=" font-semibold text-[#6941C6]">Reset password</span>
         </a>
-      </Text>
+      </Text> -->
 
       <Button class="w-full max-w-[360px]" type="submit">Sign in</Button>
     </Form>

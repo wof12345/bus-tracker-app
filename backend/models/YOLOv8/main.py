@@ -133,7 +133,7 @@ def getLicensePlatesFromVideo(  # noqa: C901
                         license_plate_crop_processed
                     )
 
-                # ultimately get a readout of the average calculated direction on the video for the last 5 minutes or a variable time
+                # ultimately get a readout of the average calculated direction on the video for the last 5 minutes or a variable time (only in real camera feed)
                 direction = get_highest_average_direction(vehicle_tracker, car_id)
                 direction = direction[0]
                 if license_plate_text is not None:

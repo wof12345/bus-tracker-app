@@ -118,6 +118,14 @@
   function fillFormData() {
     busForm = JSON.parse(JSON.stringify(vehicle));
 
+    if (busForm.driver)
+      busForm.driver["name"] =
+        busForm.driver.first_name + " " + busForm.driver.last_name;
+
+    if (busForm.helper)
+      busForm.helper["name"] =
+        busForm.helper.first_name + " " + busForm.helper.last_name;
+
     let time = busForm.time?.split(":");
 
     if (time) {
@@ -128,6 +136,7 @@
   }
 
   $: fillFormData(vehicle);
+
   async function edit() {
     let form = new FormData();
 
@@ -195,7 +204,7 @@
       </p>
     </div>
 
-    {#if vehicle?.route}
+    {#if vehicle?.route && vehicle.driver}
       <Button
         class="w-max"
         onClick={(e) => {

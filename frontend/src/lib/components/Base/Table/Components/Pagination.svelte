@@ -32,15 +32,25 @@
 
   function goToPreviousPage() {
     if (currentPage > 1) {
-      goto(`${pathname}?skip=${(currentPage - 2) * pageSize}`);
-      onPageChange(currentPage - 1);
+      let newUrl = addSeachParamToURL({
+        key: "page",
+        value: currentPage - 1,
+      });
+
+      if (!noReload) goto(newUrl);
+      else skip = currentPage - 1;
     }
   }
 
   function goToNextPage() {
     if (currentPage < totalPages) {
-      goto(`${pathname}?skip=${currentPage * pageSize}`);
-      onPageChange(currentPage + 1);
+      let newUrl = addSeachParamToURL({
+        key: "page",
+        value: currentPage + 1,
+      });
+
+      if (!noReload) goto(newUrl);
+      else skip = currentPage + 1;
     }
   }
 

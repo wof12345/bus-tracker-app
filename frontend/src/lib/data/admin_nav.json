@@ -43,5 +43,10 @@
     "name": "Commuters",
     "href": "/commuters",
     "icon": "commuter.svg"
+  },
+  {
+    "name": "Live",
+    "href": "/live",
+    "icon": "live.svg"
   }
 ]

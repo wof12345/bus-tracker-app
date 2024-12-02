@@ -11,7 +11,7 @@
 
   export let data;
 
-  $: console.log(data);
+
 
   $: statistics = data?.statistics;
 </script>
@@ -20,7 +20,7 @@
   <TableHeader class="mb-3" title="Home" subtitle="Current app statistics" />
 
   <div class="grid grid-cols-3 gap-3">
-    {#if statistics}
+    {#if statistics && !statistics.error}
       {#each Object.keys(statistics) as stat}
         <Card>
           <Container class="justify-between">

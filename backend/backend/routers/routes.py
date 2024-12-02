@@ -41,7 +41,9 @@ def create_route(item: RouteCreate):
 @router.get('/', response_model=AllRouteResponse)
 def get_all_routes(page: int = 1, per_page: int = 10):
     skip, limit = get_pagination_data(page, per_page)
+
     total = collection.count_documents({})
+
     routes = list(collection.find().skip(skip).limit(limit))
 
     routes = populate_ref_array(routes, 'hotspots', 'hotspots')

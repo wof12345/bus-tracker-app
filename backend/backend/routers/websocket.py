@@ -175,7 +175,7 @@ async def broadCastLiveData(vehicle_id):
         vehicle = simulateBus(vehicle_id)
         # vehicle = getBusData(vehicle_id)
 
-        print(active_client_sessions)
+        # print(active_client_sessions)
 
         for client in active_client_sessions[vehicle_id]:
             await client.send_text(json.dumps(vehicle))
