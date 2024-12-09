@@ -147,7 +147,7 @@ def getBusData(id):
     if vehicle_last_move:
         difference = current_date - vehicle_last_move
 
-        print(difference, 'diff')
+        # print(difference, 'diff')
 
         if (
             abs(difference.total_seconds()) < 30

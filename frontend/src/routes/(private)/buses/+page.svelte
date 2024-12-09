@@ -54,12 +54,18 @@
 
   let createModal;
   let editModal;
+  let detailModal;
 
   let reservationMap = {};
 
   function selectItem(item) {
+    console.log(item);
     selectedBus = item;
     selectedBusRef = JSON.parse(JSON.stringify(item));
+  }
+
+  function openDriverDetails() {
+    detailModal.show();
   }
 
   function formatTime(time) {
@@ -208,6 +214,10 @@
                   onClick={() => {
                     if (isAdmin($authStore) || isManager($authStore))
                       goto(`/buses/${item._id}`);
+                    else {
+                      selectItem(item);
+                      openDriverDetails();
+                    }
                   }}
                   class="items-center hover:cursor-pointer hover:bg-gray-100"
                 >
@@ -244,9 +254,11 @@
                     <TableCell class="col-span-1">
                       <Button
                         class="p-0 px-2 text-xs w-max rounded-xl max-w-full"
-                        onClick={() => {
+                        onClick={(e) => {
                           if (item.route?._id)
                             goto(`/routes/${item.route?._id}/edit`);
+
+                          e.stopPropagation();
                         }}
                       >
                         {item.route?.name || "Not assigned"}
@@ -393,6 +405,99 @@
       onClick={() => {
         editModal.hide();
       }}>Cancel</Button
+    >
+  </ModalFooter>
+</Modal>
+
+<Modal class="min-w-[300px]" bind:this={detailModal}>
+  <ModalHeader>
+    <Title class="text-lg md:text-lg">Bus details</Title>
+    <Paragraph>Check out bus details</Paragraph>
+  </ModalHeader>
+
+  <ModalBody class="gap-3">
+    <InputGroup flow="col">
+      <FormFieldLabel>Driver detals</FormFieldLabel>
+
+      {#if selectedBusRef.driver}
+        <div class="flex justify-between w-full">
+          <p class="font-semibold text-xs">Name :</p>
+
+          <p class="text-xs">
+            {selectedBusRef.driver.first_name +
+              " " +
+              selectedBusRef.driver.last_name}
+          </p>
+        </div>
+
+        <div class="flex justify-between w-full">
+          <p class="font-semibold text-xs">Phone :</p>
+
+          <p class="text-xs">
+            {selectedBusRef.driver.phone}
+          </p>
+        </div>
+      {:else}
+        <div class="flex justify-between w-full">
+          <p class="text-xs">Driver not assigned yet</p>
+        </div>
+      {/if}
+    </InputGroup>
+
+    <InputGroup flow="col">
+      <FormFieldLabel>Helper detals</FormFieldLabel>
+
+      {#if selectedBusRef.helper}
+        <div class="flex justify-between w-full">
+          <p class="font-semibold text-xs">Name :</p>
+
+          <p class="text-xs">
+            {selectedBusRef.helper.first_name +
+              " " +
+              selectedBusRef.helper.last_name}
+          </p>
+        </div>
+
+        <div class="flex justify-between w-full">
+          <p class="font-semibold text-xs">Phone :</p>
+
+          <p class="text-xs">
+            {selectedBusRef.helper.phone}
+          </p>
+        </div>
+      {:else}
+        <div class="flex justify-between w-full">
+          <p class="text-xs">Helper not assigned yet</p>
+        </div>
+      {/if}
+    </InputGroup>
+
+    <InputGroup flow="col">
+      <FormFieldLabel>Description</FormFieldLabel>
+
+      <div class="flex justify-between w-full">
+        <p class="text-xs">
+          {selectedBusRef.description}
+        </p>
+      </div>
+    </InputGroup>
+
+    <InputGroup flow="col">
+      <FormFieldLabel>License text</FormFieldLabel>
+
+      <div class="flex justify-between w-full">
+        <p class="text-xs">
+          {selectedBusRef.license}
+        </p>
+      </div>
+    </InputGroup>
+  </ModalBody>
+
+  <ModalFooter class="gap-2">
+    <Button
+      onClick={() => {
+        detailModal.hide();
+      }}>Close</Button
     >
   </ModalFooter>
 </Modal>
