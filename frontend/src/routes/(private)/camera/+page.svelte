@@ -71,7 +71,7 @@
   />
 
   <div class="grid grid-cols-2 gap-2 h-full items-center content-center">
-    <video class="mx-auto" src={urlForm.url} controls>
+    <video class="mx-auto max-h-[400px]" src={urlForm.url} controls>
       <track kind="captions" />
     </video>
 

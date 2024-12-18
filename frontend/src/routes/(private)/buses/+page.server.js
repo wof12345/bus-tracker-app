@@ -11,7 +11,7 @@ export const load = async ({ cookies, fetch, url }) => {
       let params = { page };
 
       if (tab && tab != 0) {
-        params['reservation'] = tab
+        params['reservation_id'] = tab
       }
 
       const request = await api.get("/vehicles/", token, fetch, params);

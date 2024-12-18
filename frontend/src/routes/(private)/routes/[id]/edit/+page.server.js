@@ -18,6 +18,23 @@ export const load = async ({ cookies, fetch, params }) => {
     }
   };
 
+  const getBuses = async () => {
+    try {
+      let params = {};
+
+      if (id) {
+        params['route_id'] = id
+      }
+
+      const request = await api.get("/vehicles/", token, fetch, params);
+      const data = await request.json();
+
+      return data;
+    } catch (error) {
+      return { error: error?.detail || "Something went wrong!" };
+    }
+  };
+
   const getRoute = async () => {
     try {
       let params = {};
@@ -34,6 +51,7 @@ export const load = async ({ cookies, fetch, params }) => {
   return {
     route: await getRoute(),
     hotspots: await getHotspots(),
+    buses: await getBuses()
   };
 };
 

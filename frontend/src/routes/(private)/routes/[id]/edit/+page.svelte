@@ -24,6 +24,8 @@
   import Menu from "$components/Base/Menu/Menu.svelte";
   import Option from "$components/Base/Forms/Components/Option.svelte";
   import { authStore, isAdmin, isManager } from "$lib/store/auth";
+  import Title from "$components/Base/Typography/Title.svelte";
+  import { digitizeNumber } from "$components/utils/textMethods.js";
 
   export let data;
 
@@ -89,7 +91,16 @@
     return [lng, lat];
   }
 
-  $: console.log(selectedHotspots);
+  function formatTime(time) {
+    if (!time) return;
+
+    let str = time.split(":");
+
+    let timeStr = str[0] + ":" + digitizeNumber(str[1]) + " " + str[2];
+
+    return timeStr;
+  }
+
   async function save() {
     let form = new FormData();
 
@@ -169,7 +180,6 @@
     let marker;
 
     if (idx === 0) {
-      console.log(idx);
       marker = leaflet
         ?.marker(coordinates, { icon: redMarker })
         .addTo(map)
@@ -453,6 +463,23 @@
         {#if selectedHotspots[idx + 1]}
           <IconArrowRight size={16} />
         {/if}
+      {/each}
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <Title class="text-md md:text-md">Buses assigned to this route</Title>
+
+      {#each data?.buses?.data || [] as bus}
+        <button
+          on:click={() => {
+            goto(`/buses?selected=${bus._id}`);
+          }}
+          class="hover:cursor-pointer hover:bg-gray-100 p-2 w-full rounded-sm text-sm text-start flex justify-between flex-wrap"
+        >
+          <p>{bus.name}</p>
+
+          <p>{formatTime(bus.time)}</p>
+        </button>
       {/each}
     </div>
 

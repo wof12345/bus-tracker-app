@@ -21,10 +21,13 @@ def update_vehicle(update_data, id):
     return updated_vehicle
 
 
-def get_vehicles(skip=0, limit=100000, reservation=None):
+def get_vehicles(skip=0, limit=100000, reservation_id=None, route_id=None):
     query = {}
-    if reservation:
-        query['reservation._id'] = ObjectId(reservation)
+    if reservation_id:
+        query['reservation._id'] = ObjectId(reservation_id)
+
+    if route_id:
+        query['route._id'] = ObjectId(route_id)
 
     # vehicles = list(collection.find(query).skip(skip).limit(limit))
 

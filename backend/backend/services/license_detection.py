@@ -11,15 +11,15 @@ def update_vehicle_based_on_plate(plates):
 
             if vehicle:
                 if plate_obj['direction'] == 'coming':
-                    update_vehicle(
+                    vehicle = update_vehicle(
                         {'status': 'Stopped', 'in_campus': True}, vehicle['_id']
                     )
                 elif plate_obj['direction'] == 'going':
-                    update_vehicle(
+                    vehicle = update_vehicle(
                         {'status': 'Running', 'in_campus': False}, vehicle['_id']
                     )
                 else:
-                    update_vehicle(
+                    vehicle = update_vehicle(
                         {'status': 'Unknown', 'in_campus': False}, vehicle['_id']
                     )
 

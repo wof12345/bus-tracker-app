@@ -162,6 +162,8 @@ def getLicensePlatesFromVideo(  # noqa: C901
     if generate_csv:
         write_csv(results, 'models/YOLOv8/test.csv')
 
+    print(license_plate_texts, 'sad')
+
     if output_path:
         visualize(
             outputPath=output_path,

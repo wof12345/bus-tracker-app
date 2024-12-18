@@ -3,7 +3,9 @@
   import { page } from "$app/stores";
   import Button from "$components/Base/Buttons/Button.svelte";
   import TableHeader from "$components/Tables/Components/TableHeader.svelte";
+  import { digitizeNumber } from "$components/utils/textMethods.js";
   import { showToaster } from "$lib/store/toaster.ts";
+  import { formatIsoTimeString } from "@fullcalendar/core/internal.js";
   import { IconArrowLeft } from "@tabler/icons-svelte";
   import { onDestroy, onMount } from "svelte";
 
@@ -28,6 +30,16 @@
   let popupRef;
 
   let socket;
+
+  function formatTime(time) {
+    if (!time) return;
+
+    let str = time.split(":");
+
+    let timeStr = str[0] + ":" + digitizeNumber(str[1]) + " " + str[2];
+
+    return timeStr;
+  }
 
   function addMarkerMap(vehicle) {
     let coordinates = vehicle.coordinates;
@@ -276,7 +288,11 @@
             }}
             class="p-1 hover:bg-gray-100 w-full text-start"
           >
-            <p>{currentTrackedBuses[key].name} :</p>
+            <p>
+              {currentTrackedBuses[key].name} : {formatTime(
+                currentTrackedBuses[key].time,
+              )}
+            </p>
           </button>
         {/each}
       </div>

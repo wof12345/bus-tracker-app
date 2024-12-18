@@ -44,8 +44,6 @@
   let selectedRoute;
   let selectedRouteRef;
 
-  $: console.log(routes);
-
   function selectItem(item) {
     selectedRoute = item;
     selectedRouteRef = JSON.parse(JSON.stringify(item));

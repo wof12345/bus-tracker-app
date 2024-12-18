@@ -2034,7 +2034,7 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<=3.12"
-content-hash = "987427f6f765fd8e2c6c27b9917d5283d5a1476c180eab12d8900f4a9149c5b5"
+content-hash = "f05782085746769812436474f55a743630c64c5220c16b3bf4c1ec64f9ce0561"
 
 [metadata.files]
 albucore = [

@@ -40,12 +40,15 @@ def create_vehicle(item: VehicleCreate):
 
 @router.get('/', response_model=AllVehicleResponse)
 def get_all_vehicles(
-    page: int = 1, per_page: int = 10, reservation: Optional[str] = ''
+    page: int = 1,
+    per_page: int = 10,
+    reservation_id: Optional[str] = '',
+    route_id: Optional[str] = '',
 ):
     skip, limit = get_pagination_data(page, per_page)
     total = collection.count_documents({})
 
-    vehicles = get_vehicles(skip, limit, reservation)
+    vehicles = get_vehicles(skip, limit, reservation_id, route_id)
 
     return {
         'total': total,

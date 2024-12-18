@@ -36,11 +36,14 @@
   import TabHeaders from "$components/Base/Tab/TabHeaders.svelte";
   import TabPanel from "$components/Base/Tab/TabPanel.svelte";
   import { onMount } from "svelte";
+  import { page } from "$app/stores";
 
   export let data;
 
   $: buses = data?.vehicles;
   $: reservations = data?.reservations?.data || [];
+
+  $: selected = $page.url.searchParams.get("selected");
 
   let busCreateForm = {
     name: undefined,
@@ -59,7 +62,16 @@
   let reservationMap = {};
 
   function selectItem(item) {
-    console.log(item);
+    const newQuery = new URLSearchParams({
+      selected: item._id,
+    });
+
+    goto(`?${newQuery.toString()}`, {
+      replaceState: true,
+      invalidateAll: false,
+      keepFocus: true,
+    });
+
     selectedBus = item;
     selectedBusRef = JSON.parse(JSON.stringify(item));
   }
@@ -219,7 +231,10 @@
                       openDriverDetails();
                     }
                   }}
-                  class="items-center hover:cursor-pointer hover:bg-gray-100"
+                  class="items-center hover:cursor-pointer hover:bg-gray-100 {selected ===
+                  item._id
+                    ? 'bg-gray-100'
+                    : ''}"
                 >
                   <TableCell
                     class="col-span-1 flex gap-3 font-normal text-sm text-[#475467]"
@@ -412,7 +427,7 @@
 <Modal class="min-w-[300px]" bind:this={detailModal}>
   <ModalHeader>
     <Title class="text-lg md:text-lg">Bus details</Title>
-    <Paragraph>Check out bus details</Paragraph>
+    <Paragraph>Check out bus details for {selectedBusRef.name}</Paragraph>
   </ModalHeader>
 
   <ModalBody class="gap-3">
