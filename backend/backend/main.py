@@ -7,7 +7,7 @@ from pymongo.errors import PyMongoError
 
 from backend.config import settings
 from backend.routers import (
-    license_detection,
+    # license_detection,
     vehicles,
     hotspots,
     users,
@@ -80,12 +80,12 @@ app.include_router(
     dependencies=[Depends(auth_scheme)],
 )
 
-app.include_router(
-    license_detection.router,
-    tags=['license-detection'],
-    prefix='/license-detection',
-    dependencies=[Depends(auth_scheme)],
-)
+# app.include_router(
+#     license_detection.router,
+#     tags=['license-detection'],
+#     prefix='/license-detection',
+#     dependencies=[Depends(auth_scheme)],
+# )
 
 
 app.include_router(
