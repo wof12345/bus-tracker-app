@@ -4,7 +4,7 @@ import { showSpinner } from "$lib/store/spinner";
 import api from "$lib/api/api";
 
 export const load = async (event) => {
-  const { parent } = event
+  const { parent } = event;
   const { user } = await parent();
 
   if (validateApiResponse(user)) {
@@ -45,8 +45,7 @@ export const actions = {
           token: data.token,
         };
 
-
-      cookies.set('token', data.token, { path: '/' })
+      cookies.set("token", data.token, { path: "/" });
 
       return (
         userData || {
@@ -57,8 +56,7 @@ export const actions = {
         }
       );
     } catch (error) {
-
-      console.log(error)
+      console.log(error);
       return { error: error?.detail || "Something went wrong!" };
     }
   },

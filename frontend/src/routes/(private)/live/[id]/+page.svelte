@@ -6,6 +6,7 @@
   import { showToaster } from "$lib/store/toaster.ts";
   import { IconArrowLeft } from "@tabler/icons-svelte";
   import { onDestroy, onMount } from "svelte";
+  import { env } from "$env/dynamic/public";
 
   export let data;
 
@@ -120,7 +121,11 @@
       const { lat, lng } = event.latlng;
     });
 
-    socket = new WebSocket("ws://localhost:8001/websocket/ws");
+    socket = new WebSocket(
+      `wss://${env.PUBLIC_BASE_URL.split("//")[1]}/websocket/ws`,
+    );
+
+    // console.log(`ws://${env.PUBLIC_BASE_URL.split("//")[1]}/websocket/ws`); //dev url
 
     socket.onopen = () => {
       console.log("WebSocket connection established");

@@ -1,20 +1,13 @@
 import { validateApiResponse } from "$components/utils/validateApiResponse";
 import api from "$lib/api/api";
-
+import { env } from "$env/dynamic/public";
 
 const ENVIRONMENT = import.meta.env.VITE_ENVIRONMENT;
 
-
 // let PUBLIC_BASE_URL = 'http://backend:8000' //deubug
 
-
-
 let PUBLIC_BASE_URL =
-  ENVIRONMENT === "dev"
-    ? import.meta.env.VITE_PUBLIC_BASE_URL
-    : process.env.VITE_PUBLIC_BASE_URL;
-
-
+  ENVIRONMENT === "dev" ? env.PUBLIC_BASE_URL : process.env.PUBLIC_BASE_URL;
 
 export async function handleFetch({ request, fetch }) {
   const url = new URL(request.url);
@@ -26,7 +19,7 @@ export async function handleFetch({ request, fetch }) {
 
   //logs for debug purpose
   // console.log(request.url, url);
-  if (request.url.includes('localhost'))
+  if (request.url.includes("localhost"))
     request = new Request(`${PUBLIC_BASE_URL}${fullPath}`, request);
   // request = new Request(url, request);
   // console.log(request.url, `${PUBLIC_BASE_URL}${fullPath}`, request.url.includes('localhost'), PUBLIC_BASE_URL, ENVIRONMENT);
@@ -39,9 +32,8 @@ export const handle = async ({ event, resolve }) => {
 
   //handle persisiting auth
   const verifyUser = async () => {
-    let dummy = { first_name: 'test', email: 'example@gmail.com' }
+    let dummy = { first_name: "test", email: "example@gmail.com" };
     try {
-
       const token = event.cookies.get("token");
 
       const fetch = event.fetch;
@@ -56,23 +48,18 @@ export const handle = async ({ event, resolve }) => {
 
         return data;
       } catch (error) {
-
-        console.log('err', error);
-        return dummy
+        console.log("err", error);
+        return dummy;
       }
-
-
-
     } catch (error) {
-      console.log(error)
-      return
+      console.log(error);
+      return;
     }
   };
 
-
   //pass down functions and utils to child server pages
   event.locals.verifyUser = verifyUser;
-  event.locals.ENVIRONMENT = ENVIRONMENT
+  event.locals.ENVIRONMENT = ENVIRONMENT;
 
   return await resolve(event);
 };

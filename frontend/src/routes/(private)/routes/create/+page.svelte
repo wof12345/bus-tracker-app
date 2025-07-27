@@ -352,7 +352,7 @@
       />
     </InputGroup>
 
-    <div class="h-max bg-gray-50 flex flex-wrap gap-2 items-center">
+    <div class="h-max bg-gray-50 flex flex-wrap gap-2 items-center p-2">
       {#each selectedHotspots as hotspot, idx}
         <button
           on:click={() => {
@@ -365,7 +365,7 @@
           </p>
 
           <IconButton
-            class="aspect-auto"
+            class="aspect-auto w-max h-max"
             on:click={() => {
               let index = selectedHotspots.findIndex(
                 (item) => hotspot.value == item.value,

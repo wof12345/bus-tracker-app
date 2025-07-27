@@ -3,12 +3,12 @@ import { getCookie } from "$components/utils/clientCookie";
 type ValueType = string | boolean | number;
 
 const ENVIRONMENT = import.meta.env.VITE_ENVIRONMENT;
+import { env } from "$env/dynamic/public";
 
-// let PUBLIC_BASE_URL = process.env.VITE_PUBLIC_BASE_URL;
-let PUBLIC_BASE_URL =
-  ENVIRONMENT === "dev"
-    ? import.meta.env.VITE_PUBLIC_BASE_URL
-    : process.env.VITE_PUBLIC_BASE_URL;
+// let PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL;
+const PUBLIC_BASE_URL =
+  ENVIRONMENT === "dev" ? env.PUBLIC_BASE_URL : process.env.PUBLIC_BASE_URL;
+
 interface PostOptions<T> {
   body: T;
   params?: Record<string, ValueType>;
@@ -19,7 +19,7 @@ async function get(
   token: string | undefined,
   nodeFetch: any,
   params?: Record<string, string>,
-  stringParam:any=undefined
+  stringParam: any = undefined,
 ) {
   const url = new URL(pathname, PUBLIC_BASE_URL);
   url.search = new URLSearchParams(params).toString();
@@ -39,7 +39,10 @@ async function get(
   //determine fetch (node  || browser)
   let apiFetch = nodeFetch || fetch;
 
-  const response = await apiFetch(url.toString()+(stringParam?"&"+stringParam:""), options);
+  const response = await apiFetch(
+    url.toString() + (stringParam ? "&" + stringParam : ""),
+    options,
+  );
 
   return response;
 }

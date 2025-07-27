@@ -8,6 +8,7 @@
   import { formatIsoTimeString } from "@fullcalendar/core/internal.js";
   import { IconArrowLeft } from "@tabler/icons-svelte";
   import { onDestroy, onMount } from "svelte";
+  import { env } from "$env/dynamic/public";
 
   export let data;
 
@@ -205,8 +206,13 @@
 
     map.getPane("popupPane").style.zIndex = 1005;
 
-    socket = new WebSocket("ws://localhost:8001/websocket/ws");
+    console.log(env);
 
+    socket = new WebSocket(
+      `wss://${env.PUBLIC_BASE_URL.split("//")[1]}/websocket/ws`,
+    );
+
+    // ws://${env.PUBLIC_BASE_URL.split("//")[1]}/websocket/ws //dev url
     socket.onopen = () => {
       let buses = data.vehicles.data.map((elm) => new Object({ _id: elm._id }));
 

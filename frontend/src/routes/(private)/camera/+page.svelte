@@ -80,7 +80,7 @@
         <FormFieldLabel
           >Upload a video file to run the tracking process on:</FormFieldLabel
         >
-        <FileUpload bind:file={urlForm.file} />
+        <FileUpload disabled={true} bind:file={urlForm.file} />
       </InputGroup>
 
       <Paragraph class="text-xs">
@@ -102,7 +102,10 @@
         </ul>
       </Paragraph>
 
-      <Button onClick={() => process()} class="w-max">Process</Button>
+      <div class="text-xs text-red-600">Temporarily disabled</div>
+      <Button disabled={true} onClick={() => process()} class="w-max"
+        >Process</Button
+      >
     </div>
   </div>
 
