@@ -222,6 +222,16 @@
       })
       .addTo(map);
 
+    let iconUrl = "/marker-icon.png";
+    let iconRetinaUrl = "/marker-icon-2x.png";
+    let shadowUrl = "/marker-shadow.png";
+
+    leaflet.Icon.Default.mergeOptions({
+      iconUrl,
+      iconRetinaUrl,
+      shadowUrl,
+    });
+
     map.on("click", async function (event) {
       const { lat, lng } = event.latlng;
 
